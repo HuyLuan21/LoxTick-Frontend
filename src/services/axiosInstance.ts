@@ -1,8 +1,8 @@
 import axios from "axios";
-import { getToken } from "../services/tokenService";
+import { getToken } from "./tokenService";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/api", // ← URL backend
+  baseURL: "http://localhost:3000/api", // ← URL backend
   timeout: 10000, // ← timeout 10 giây
   headers: {
     "Content-Type": "application/json",
