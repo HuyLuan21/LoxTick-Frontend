@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { login } from "@/services/authService";
 import type { User } from "@/types/user.type";
+import { useState } from "react";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -45,39 +50,52 @@ export default function LoginModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    // ✅ Dùng open + onOpenChange để Header control được modal
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl font-black">
-            <span className="bg-clip-text text-transparent">LoxTick</span>
-          </DialogTitle>
+          <DialogTitle>Đăng nhập</DialogTitle>
+          <DialogDescription>
+            Nhập email và mật khẩu để tiếp tục.
+          </DialogDescription>
         </DialogHeader>
+        <FieldGroup>
+          <Field>
+            <Label htmlFor="email">Email</Label>
+            {/* ✅ Kết nối value + onChange vào state */}
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
+          <Field>
+            <Label htmlFor="password">Mật khẩu</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field>
+        </FieldGroup>
 
-        <div className="flex flex-col gap-3">
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Input
-            type="password"
-            placeholder="Mật khẩu"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          />
+        {/* ✅ Hiển thị lỗi nếu có */}
+        {error && <p className="text-sm text-red-500">{error}</p>}
 
-          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
-
-          <Button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full text-white font-bold"
-          >
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline" onClick={onClose}>
+              Huỷ
+            </Button>
+          </DialogClose>
+          {/* ✅ Gọi handleSubmit khi bấm nút */}
+          <Button onClick={handleSubmit} disabled={loading}>
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
