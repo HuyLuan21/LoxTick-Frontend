@@ -41,7 +41,7 @@ export default function Header() {
         >
           <input
             type="text"
-            placeholder="Tìm kiếm video"
+            placeholder="Tìm kiếm"
             className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
