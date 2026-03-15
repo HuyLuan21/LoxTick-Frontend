@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "./tokenService";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3000/api", // ← URL backend
+  baseURL: import.meta.env.VITE_API_URL, // ← URL backend
   timeout: 10000, // ← timeout 10 giây
   headers: {
     "Content-Type": "application/json",
