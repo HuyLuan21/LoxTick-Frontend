@@ -1,34 +1,32 @@
-import { createBrowserRouter } from "react-router"
-import App from "../App"
-import ProtectedRoute from "./ProtectedRoute"
+// routers/index.tsx
+import { createBrowserRouter, Outlet } from "react-router";
+import App from "../App";
+import ProtectedRoute from "./ProtectedRoute";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,        // App là layout wrapper
+    element: <App />,
     children: [
+      { index: true, element: <div>Trang chủ</div> },
+      { path: "explore", element: <div>Khám phá</div> },
       {
-        index: true,
-        element: <div>Trang chủ</div>,   // thay bằng component thật
-      },
-      {
-        path: "explore",
-        element: <div>Khám phá</div>,
-      },
-      {
-        path: "profile",
         element: (
           <ProtectedRoute>
-            <div>Hồ sơ</div>
+            <Outlet />
           </ProtectedRoute>
         ),
+        children: [
+          { path: "profile", element: <div>Hồ sơ</div> },
+          { path: "settings", element: <div>Cài đặt</div> },
+        ],
       },
     ],
   },
   {
     path: "/login",
-    element: <div>Login</div>,   // ngoài App, không có sidebar
+    element: <div>Login</div>,
   },
-])
+]);
 
-export default router
+export default router;

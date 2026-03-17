@@ -84,13 +84,24 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <DialogFooter>
+          <Label htmlFor="Đăng kí">
+            Chưa có tài khoản?{" "}
+            <a className="text-tiktok-red" href="/register">
+              Đăng kí
+            </a>
+          </Label>
+
           <DialogClose asChild>
             <Button variant="outline" onClick={onClose}>
               Huỷ
             </Button>
           </DialogClose>
           {/* ✅ Gọi handleSubmit khi bấm nút */}
-          <Button onClick={handleSubmit} disabled={loading}>
+          <Button
+            className="bg-tiktok-red hover:bg-tiktok-red/80"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </Button>
         </DialogFooter>
