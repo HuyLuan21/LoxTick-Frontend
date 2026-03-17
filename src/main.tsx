@@ -1,14 +1,18 @@
-import { StrictMode } from "react";
+// import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { store } from "./redux/store";
 import { Provider } from "react-redux";
-
+import { TooltipProvider } from "./components/ui/tooltip";
+import { RouterProvider } from "react-router";
+import router from "./router";
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
   <Provider store={store}>
-    <App />
+    <TooltipProvider>
+      <RouterProvider router={router} />
+    </TooltipProvider>
   </Provider>,
   // </StrictMode>,
 );

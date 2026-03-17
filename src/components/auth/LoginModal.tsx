@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { login } from "@/services/authService";
-import type { User } from "@/types/user.type";
+// import type { User } from "@/types/user.type";
 import { useState } from "react";
 
 interface LoginModalProps {
@@ -50,7 +50,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Đăng nhập</DialogTitle>
+          <DialogTitle className="text-2xl tracking-tight text-[#161823]">
+            Đăng nhập vào LoxTick
+          </DialogTitle>
           <DialogDescription>
             Nhập email và mật khẩu để tiếp tục.
           </DialogDescription>

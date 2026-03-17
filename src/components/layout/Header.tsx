@@ -3,8 +3,13 @@ import { selectCurrentUser } from "@/redux/selector";
 import { useState } from "react";
 import LoginModal from "../auth/LoginModal";
 import { logout } from "@/redux/slices/authSlice";
+import { cn } from "@/lib/utils";
 
-export default function Header() {
+interface HeaderProps {
+  className?: string;
+}
+
+export default function Header({ className }: HeaderProps) {
   const dispatch = useAppDispatch();
 
   const [searchFocused, setSearchFocused] = useState(false);
@@ -15,7 +20,12 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-50">
+      <header
+        className={cn(
+          "fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-50",
+          className,
+        )}
+      >
         {/* Logo */}
         <a href="/" className="flex items-center gap-1">
           <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
