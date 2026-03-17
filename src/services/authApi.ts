@@ -11,3 +11,12 @@ export const loginApi = async (
   });
   return response.data;
 };
+
+export const getCurrentUser = async () => {
+  const response = await axiosInstance.get("/auth/me");
+  return response.data;
+};
+
+export const logoutApi = async () => {
+  await axiosInstance.post("/auth/logout");
+};

@@ -18,14 +18,9 @@ import { useState } from "react";
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess: (user: User) => void;
 }
 
-export default function LoginModal({
-  isOpen,
-  onClose,
-  onLoginSuccess,
-}: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,9 +34,10 @@ export default function LoginModal({
     try {
       setLoading(true);
       setError("");
-      const userData = await login(email, password);
-      onLoginSuccess(userData);
+      await login(email, password);
       onClose();
+
+      window.location.href = "/";
     } catch {
       setError("Sai email hoặc mật khẩu!");
     } finally {

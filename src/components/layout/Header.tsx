@@ -1,13 +1,17 @@
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { selectCurrentUser } from "@/redux/selector";
 import { useState } from "react";
 import LoginModal from "../auth/LoginModal";
-import type { User } from "@/types/user.type";
+import { logout } from "@/redux/slices/authSlice";
 
 export default function Header() {
+  const dispatch = useAppDispatch();
+
   const [searchFocused, setSearchFocused] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const currentUser = useAppSelector(selectCurrentUser);
 
   return (
     <>
@@ -63,7 +67,7 @@ export default function Header() {
             Upload
           </button>
 
-          {isLoggedIn ? (
+          {currentUser ? (
             <div className="relative">
               {/* Avatar */}
               <div
@@ -71,7 +75,7 @@ export default function Header() {
                 onClick={() => setShowDropdown(!showDropdown)}
               >
                 <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold text-sm">
-                  {user?.display_name.charAt(0).toUpperCase()}
+                  {currentUser?.display_name.charAt(0).toUpperCase()}
                 </div>
               </div>
 
@@ -86,9 +90,11 @@ export default function Header() {
                     {/* Tên user */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-semibold text-gray-800">
-                        {user?.display_name}
+                        {currentUser?.display_name}
                       </p>
-                      <p className="text-xs text-gray-400">{user?.email}</p>
+                      <p className="text-xs text-gray-400">
+                        {currentUser?.email}
+                      </p>
                     </div>
                     {/* Xem hồ sơ */}
                     <button
@@ -113,9 +119,9 @@ export default function Header() {
                     {/* Đăng xuất */}
                     <button
                       onClick={() => {
+                        dispatch(logout());
+
                         setShowDropdown(false);
-                        setIsLoggedIn(false);
-                        setUser(null);
                       }}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition"
                     >
@@ -152,15 +158,7 @@ export default function Header() {
           )}
         </div>
       </header>
-      <LoginModal
-        isOpen={showLogin}
-        onClose={() => setShowLogin(false)}
-        onLoginSuccess={(userData) => {
-          setUser(userData);
-          setIsLoggedIn(true);
-          setShowLogin(false);
-        }}
-      />
+      <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
     </>
   );
 }
