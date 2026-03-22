@@ -20,3 +20,16 @@ export const getCurrentUser = async () => {
 export const logoutApi = async () => {
   await axiosInstance.post("/auth/logout");
 };
+
+export const registerApi = async (
+  username: string,
+  email: string,
+  password: string,
+): Promise<LoginResponse> => {
+  const response = await axiosInstance.post<LoginResponse>("/auth/register", {
+    username,
+    email,
+    password,
+  });
+  return response.data;
+};

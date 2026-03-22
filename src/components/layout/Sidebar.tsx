@@ -77,7 +77,7 @@ export function AppSidebar() {
                   data-[active=true]:[&_svg]:text-tiktok-red"
                 >
                   <Link to={item.url} className="flex items-center gap-3">
-                    <item.icon className="!h-6 !w-6 !shrink-0" />
+                    <item.icon className="h-6! w-6! shrink-0!" />
                     <span>{item.title}</span>
 
                     {/* Badge thông báo */}
