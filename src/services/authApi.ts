@@ -33,3 +33,19 @@ export const registerApi = async (
   });
   return response.data;
 };
+
+export const forgotPasswordApi = async (email: string) => {
+  const response = await axiosInstance.post("/auth/forgot-password", { email });
+  return response.data;
+};
+export const verifyOtpApi = async (otp: string) => {
+  const response = await axiosInstance.post("/auth/verify-otp", { otp });
+  return response.data;
+};
+export const resetPasswordApi = async (otp: string, password: string) => {
+  const response = await axiosInstance.post("/auth/reset-password", {
+    otp,
+    password,
+  });
+  return response.data;
+};

@@ -9,8 +9,6 @@ const axiosInstance = axios.create({
   },
 });
 
-// ── Request Interceptor ──────────────────────────────
-// Tự động gắn token vào mỗi request
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = getToken();
@@ -22,15 +20,11 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// ── Response Interceptor ─────────────────────────────
-// Tự động xử lý lỗi chung
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token hết hạn → tự động đăng xuất
       localStorage.removeItem("token");
-      // window.location.href = "/login";
     }
     return Promise.reject(error);
   },

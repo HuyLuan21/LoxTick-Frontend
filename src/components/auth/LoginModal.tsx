@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
+  // DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -12,16 +12,22 @@ import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { login, register } from "@/services/authService";
-// import type { User } from "@/types/user.type";
 import { useState } from "react";
+import { getCurrentUser } from "@/redux/slices/authSlice";
+import { useAppDispatch } from "@/redux/hooks";
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onForgot: () => void;
 }
 type Mode = "login" | "register";
 
-export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export default function LoginModal({
+  isOpen,
+  onClose,
+  onForgot,
+}: LoginModalProps) {
   const [mode, setMode] = useState<Mode>("login");
   const handleClose = () => {
     setMode("login");
@@ -37,13 +43,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               key="login"
               onClose={handleClose}
               onSwitch={() => setMode("register")}
+              onForgot={onForgot}
             />
           ) : (
-            <RegisterForm
-              key="register"
-              onClose={handleClose}
-              onSwitch={() => setMode("login")}
-            />
+            <RegisterForm key="register" onSwitch={() => setMode("login")} />
           )}
         </DialogContent>
       </Dialog>
@@ -53,14 +56,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 function LoginForm({
   onClose,
   onSwitch,
+  onForgot,
 }: {
   onClose: () => void;
   onSwitch: () => void;
+  onForgot: () => void;
 }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const dispatch = useAppDispatch();
   const handleSubmit = async () => {
     if (!email || !password) {
       setError("Vui lòng nhập đầy đủ!");
@@ -70,6 +76,7 @@ function LoginForm({
       setLoading(true);
       setError("");
       await login(email, password);
+      await dispatch(getCurrentUser());
       onClose();
     } catch {
       setError("Sai email hoặc mật khẩu!");
@@ -106,7 +113,7 @@ function LoginForm({
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Mật khẩu</Label>
             <a
-              href="/forgot-password"
+              onClick={onForgot}
               className="text-xs text-tiktok-red hover:underline"
             >
               Quên mật khẩu?
@@ -125,7 +132,6 @@ function LoginForm({
       {/* Error */}
       {error && <p className="text-sm text-red-500 -mt-2">{error}</p>}
 
-      {/* Submit — tách ra khỏi FieldGroup */}
       <Button
         className="w-full bg-tiktok-red hover:bg-tiktok-red/80"
         onClick={handleSubmit}
@@ -134,7 +140,6 @@ function LoginForm({
         {loading ? "Đang xử lý..." : "Đăng nhập"}
       </Button>
 
-      {/* Footer */}
       <DialogFooter className="justify-center! sm:justify-center!">
         <p className="text-sm text-muted-foreground">
           Bạn chưa có tài khoản?{" "}
@@ -149,13 +154,7 @@ function LoginForm({
     </>
   );
 }
-function RegisterForm({
-  onClose,
-  onSwitch,
-}: {
-  onClose: () => void;
-  onSwitch: () => void;
-}) {
+function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -171,7 +170,6 @@ function RegisterForm({
       setError("");
       await register(username, email, password);
       onSwitch();
-
       window.location.href = "/";
     } catch {
       setError("Email đã tồn tại hoặc có lỗi xảy ra!");
@@ -228,7 +226,6 @@ function RegisterForm({
       {/* Error */}
       {error && <p className="text-sm text-red-500 -mt-2">{error}</p>}
 
-      {/* Submit full width — nhất quán với LoginForm */}
       <Button
         className="w-full bg-tiktok-red hover:bg-tiktok-red/80"
         onClick={handleSubmit}
@@ -237,7 +234,6 @@ function RegisterForm({
         {loading ? "Đang xử lý..." : "Đăng ký"}
       </Button>
 
-      {/* Footer — nhất quán với LoginForm */}
       <DialogFooter className="justify-center! sm:justify-center!">
         <p className="text-sm text-muted-foreground">
           Đã có tài khoản?{" "}

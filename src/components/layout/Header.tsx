@@ -4,6 +4,8 @@ import { useState } from "react";
 import LoginModal from "../auth/LoginModal";
 import { logout } from "@/redux/slices/authSlice";
 import { cn } from "@/lib/utils";
+import ResetModal from "../auth/ResetModal";
+// import { useSearchParams } from "react-router-dom";
 
 interface HeaderProps {
   className?: string;
@@ -11,13 +13,14 @@ interface HeaderProps {
 
 export default function Header({ className }: HeaderProps) {
   const dispatch = useAppDispatch();
-
+  const [showReset, setShowReset] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  // const [searchParams, setSearchParams] = useSearchParams();
+  // const resetToken = searchParams.get("token");
 
   const currentUser = useAppSelector(selectCurrentUser);
-
   return (
     <>
       <header
@@ -85,7 +88,7 @@ export default function Header({ className }: HeaderProps) {
                 onClick={() => setShowDropdown(!showDropdown)}
               >
                 <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold text-sm">
-                  {currentUser?.display_name.charAt(0).toUpperCase()}
+                  {currentUser?.display_name?.charAt(0).toUpperCase()}
                 </div>
               </div>
 
@@ -168,7 +171,23 @@ export default function Header({ className }: HeaderProps) {
           )}
         </div>
       </header>
-      <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
+      <LoginModal
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+        onForgot={() => {
+          setShowLogin(false);
+          setShowReset(true);
+        }}
+      />
+
+      <ResetModal
+        isOpen={showReset}
+        onClose={() => setShowReset(false)}
+        onBack={() => {
+          setShowReset(false);
+          setShowLogin(true);
+        }}
+      />
     </>
   );
 }
