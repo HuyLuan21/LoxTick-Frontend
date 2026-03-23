@@ -1,7 +1,7 @@
 import type { User } from "@/types/user.type";
 import type { Dispatch, PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
-import * as authService from "../../services/authApi";
+import * as authService from "../../services/Api/authApi";
 
 // Define the initial state using that type
 const initialState: {

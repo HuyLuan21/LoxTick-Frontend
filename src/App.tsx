@@ -2,14 +2,11 @@
 // import reactLogo from "./assets/react.svg";
 // import viteLogo from "./assets/vite.svg";
 // import heroImg from "./assets/hero.png";
-import Header from "./components/layout/Header";
-import { AppSidebar } from "./components/layout/Sidebar";
-import "./App.css";
 import { useEffect } from "react";
+import "./App.css";
+import AppRoutes from "./components/AppRoutes";
 import { useAppDispatch } from "./redux/hooks";
 import { getCurrentUser } from "./redux/slices/authSlice";
-import { SidebarProvider } from "./components/ui/sidebar";
-import { Outlet } from "react-router";
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -22,18 +19,5 @@ export default function App() {
     }
   }, []);
 
-  return (
-    <div className="flex flex-col h-screen">
-      <Header className="h-14" />
-      <SidebarProvider
-        style={{ minHeight: "unset" }}
-        className="flex flex-1 overflow-hidden"
-      >
-        <AppSidebar />
-        <main className="flex-1 overflow-y-auto">
-          <Outlet />
-        </main>
-      </SidebarProvider>
-    </div>
-  );
+  return <AppRoutes />;
 }

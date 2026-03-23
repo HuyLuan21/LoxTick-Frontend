@@ -1,5 +1,5 @@
-import axiosInstance from "./axiosInstance";
-import type { LoginResponse } from "../types/user.type";
+import axiosInstance from "../axiosInstance";
+import type { LoginResponse } from "../../types/user.type";
 
 export const loginApi = async (
   email: string,

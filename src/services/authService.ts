@@ -4,7 +4,7 @@ import {
   registerApi,
   resetPasswordApi,
   verifyOtpApi,
-} from "./authApi";
+} from "./Api/authApi";
 import { saveToken, removeToken } from "./tokenService";
 import type { User } from "../types/user.type";
 

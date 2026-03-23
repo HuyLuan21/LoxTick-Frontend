@@ -1,10 +1,11 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { selectCurrentUser } from "@/redux/selector";
 import { useState } from "react";
-import LoginModal from "../auth/LoginModal";
+import LoginModal from "../../../auth/LoginModal";
 import { logout } from "@/redux/slices/authSlice";
 import { cn } from "@/lib/utils";
-import ResetModal from "../auth/ResetModal";
+import ResetModal from "../../../auth/ResetModal";
+import { Link } from "react-router-dom";
 // import { useSearchParams } from "react-router-dom";
 
 interface HeaderProps {
@@ -103,32 +104,34 @@ export default function Header({ className }: HeaderProps) {
                     {/* Tên user */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-semibold text-gray-800">
-                        {currentUser?.display_name}
+                        {currentUser?.display_name || currentUser?.username}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-400 truncate">
                         {currentUser?.email}
                       </p>
                     </div>
                     {/* Xem hồ sơ */}
-                    <button
-                      onClick={() => setShowDropdown(false)}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                    <Link to={`user/@${currentUser?.username}`}>
+                      <button
+                        onClick={() => setShowDropdown(false)}
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
                       >
-                        <circle cx="12" cy="8" r="4" strokeWidth="2" />
-                        <path
-                          d="M4 20c0-4 3.6-7 8-7s8 3 8 7"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      Xem hồ sơ
-                    </button>
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle cx="12" cy="8" r="4" strokeWidth="2" />
+                          <path
+                            d="M4 20c0-4 3.6-7 8-7s8 3 8 7"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        Xem hồ sơ
+                      </button>
+                    </Link>
                     {/* Đăng xuất */}
                     <button
                       onClick={() => {
