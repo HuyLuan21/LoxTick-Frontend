@@ -4,7 +4,21 @@ export interface User {
   display_name: string;
   email: string;
   avatar_url: string;
+  bio?: string;
   role: string;
+}
+
+export interface UserProfile extends User {
+  followers?: number;
+  following?: number;
+  likes?: number;
+}
+
+export interface UpdateProfilePayload {
+  username?: string;
+  display_name?: string;
+  bio?: string;
+  avatar_url?: string;
 }
 
 export interface LoginResponse {

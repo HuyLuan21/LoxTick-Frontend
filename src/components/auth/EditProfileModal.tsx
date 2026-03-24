@@ -14,21 +14,15 @@ import { createAvatar } from "@dicebear/core";
 import { lorelei } from "@dicebear/collection";
 import { useMemo } from "react";
 import { Separator } from "@/components/ui/separator";
-
-// ─── Types ──────────────────────────────────────────────────────────────────────
-
-interface User {
-  username: string;
-  display_name?: string;
-  bio?: string;
-  avatar?: string;
-}
+import { uploadToCloudinary } from "@/services/Api/Upload";
+import { UserAvatar } from "../Avavtar/userAvatar";
+import type { User } from "@/types/user.type";
 
 interface EditProfileModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: User;
-  onSave?: (data: EditProfileForm) => Promise<void>;
+  onSave: (data: EditProfilePayload) => Promise<void>; // ← bỏ optional
 }
 
 interface EditProfileForm {
@@ -38,7 +32,12 @@ interface EditProfileForm {
   avatar?: File;
 }
 
-// ─── EditProfileModal ────────────────────────────────────────────────────────────
+interface EditProfilePayload {
+  username: string;
+  display_name: string;
+  bio: string;
+  avatar_url?: string;
+}
 
 export function EditProfileModal({
   open,
@@ -47,27 +46,6 @@ export function EditProfileModal({
   onSave,
 }: EditProfileModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [form, setForm] = useState<EditProfileForm>({
-    username: user.username ?? "",
-    display_name: user.display_name ?? "",
-    bio: user.bio ?? "",
-  });
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    user.avatar ?? null,
-  );
-  const [loading, setLoading] = useState(false);
-
-  // Sync khi user thay đổi (ví dụ sau khi fetch xong)
-  useEffect(() => {
-    setForm({
-      username: user.username ?? "",
-      display_name: user.display_name ?? "",
-      bio: user.bio ?? "",
-    });
-    setAvatarPreview(user.avatar ?? null);
-  }, [user]);
-
   const dicebearAvatar = useMemo(
     () =>
       createAvatar(lorelei, {
@@ -76,8 +54,24 @@ export function EditProfileModal({
       }).toDataUri(),
     [user.username],
   );
+  const [form, setForm] = useState<EditProfileForm>({
+    username: user.username ?? "",
+    display_name: user.display_name ?? "",
+    bio: user.bio ?? "",
+  });
+  const [avatarPreview, setAvatarPreview] = useState<string>(
+    user.avatar_url ?? dicebearAvatar,
+  );
+  const [loading, setLoading] = useState(false);
 
-  const displayAvatar = avatarPreview ?? dicebearAvatar;
+  useEffect(() => {
+    setForm({
+      username: user.username ?? "",
+      display_name: user.display_name ?? "",
+      bio: user.bio ?? "",
+    });
+    setAvatarPreview(user.avatar_url ?? dicebearAvatar);
+  }, [user]);
 
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -87,11 +81,25 @@ export function EditProfileModal({
   }
 
   async function handleSave() {
-    if (!onSave) return;
     setLoading(true);
     try {
-      await onSave(form);
+      let avatarUrl: string | undefined;
+
+      if (form.avatar) {
+        const result = await uploadToCloudinary(form.avatar); // ← gọi Cloudinary
+        avatarUrl = result.secure_url;
+      }
+
+      await onSave({
+        username: form.username,
+        display_name: form.display_name,
+        bio: form.bio,
+        avatar_url: avatarUrl,
+      });
+
       onOpenChange(false);
+    } catch (error) {
+      console.error("Lỗi khi lưu hồ sơ:", error);
     } finally {
       setLoading(false);
     }
@@ -103,7 +111,7 @@ export function EditProfileModal({
       display_name: user.display_name ?? "",
       bio: user.bio ?? "",
     });
-    setAvatarPreview(user.avatar ?? null);
+    setAvatarPreview(user.avatar_url ?? dicebearAvatar);
     onOpenChange(false);
   }
 
@@ -123,15 +131,11 @@ export function EditProfileModal({
             </Label>
             <div className="flex flex-1 justify-center">
               <div className="relative inline-block">
-                <img
-                  src={displayAvatar}
-                  alt="Avatar"
-                  className="h-20 w-20 rounded-full object-cover ring-2 ring-border"
-                />
+                <UserAvatar src={avatarPreview} fallbackName={user.username} />
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-secondary ring-2 ring-background transition-colors hover:bg-secondary/80"
+                  className="absolute bottom-0 right-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-secondary ring-2 ring-background transition-colors"
                 >
                   <Pencil className="h-3.5 w-3.5 text-foreground" />
                 </button>
@@ -146,7 +150,7 @@ export function EditProfileModal({
             </div>
           </div>
 
-          {/* TikTok ID / Username */}
+          {/* Loxtik ID */}
           <div className="flex gap-6 py-5">
             <Label className="w-24 shrink-0 pt-2 text-sm font-semibold text-foreground">
               Loxtik ID
@@ -195,7 +199,6 @@ export function EditProfileModal({
                 className="bg-secondary/50"
                 placeholder="Tên hiển thị"
               />
-              <p className="text-xs text-muted-foreground"></p>
             </div>
           </div>
 

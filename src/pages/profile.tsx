@@ -28,6 +28,7 @@ import {
 import { createAvatar } from "@dicebear/core";
 import { lorelei } from "@dicebear/collection";
 import { EditProfileModal } from "@/components/auth/EditProfileModal";
+import type { UserProfile } from "@/types/user.type";
 
 // ─── Types ──────────────────────────────────────────────────────────────────────
 
@@ -114,14 +115,14 @@ const ProfilePage = () => {
   const { username } = useParams<{ username: string }>();
   const currentUser = useAppSelector((state) => state.user.currentUser);
 
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [following, setFollowing] = useState(false);
   const [sort, setSort] = useState<SortType>("Mới nhất");
   const [editOpen, setEditOpen] = useState(false);
 
-  // ✅ useMemo phải đặt TRƯỚC mọi early return để không vi phạm Rules of Hooks
+
   const dicebearAvatar = useMemo(
     () =>
       createAvatar(lorelei, {
@@ -169,7 +170,7 @@ const ProfilePage = () => {
         {/* Profile Header */}
         <div className="mb-8 flex flex-col items-start gap-6 sm:flex-row">
           <Avatar className="h-52 w-52 shrink-0 ring-2 ring-border">
-            <AvatarImage src={user.avatar} />
+            <AvatarImage src={user.avatar_url} />
             <AvatarFallback>
               <img
                 src={dicebearAvatar}
@@ -206,6 +207,14 @@ const ProfilePage = () => {
                     open={editOpen}
                     onOpenChange={setEditOpen}
                     user={user}
+                    onSave={async (data) => {
+                      const res = await userServices.updateProfile(data);
+                      if (res.user && res.user.username !== user.username) {
+                        window.location.href = `/user/@${res.user.username}`;
+                      } else {
+                        window.location.reload();
+                      }
+                    }}
                   />
                 </>
               ) : (
