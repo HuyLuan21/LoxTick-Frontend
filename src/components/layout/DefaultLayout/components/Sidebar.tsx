@@ -1,4 +1,3 @@
-// src/components/layout/Sidebar.tsx
 import {
   Sidebar,
   SidebarContent,
@@ -10,7 +9,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
 import { Link, useLocation } from "react-router";
 import {
   Home,
@@ -21,43 +19,44 @@ import {
   User,
   MoreHorizontal,
 } from "lucide-react";
-
-const navItems = [
-  { title: "Đề xuất", url: "/", icon: Home },
-  { title: "Đã follow", url: "/following", icon: UserCheck },
-  { title: "Bạn bè", url: "/friends", icon: Users },
-  { title: "Tin nhắn", url: "/messages", icon: Send },
-  { title: "Hoạt động", url: "/activity", icon: Bell, badge: 1 },
-  { title: "Hồ sơ", url: "/profile", icon: User },
-  { title: "Thêm", url: "/more", icon: MoreHorizontal },
-];
-
-const followingList = [
-  {
-    name: "Trần Bơm",
-    username: "tranbom.vcu",
-    avatar: "https://i.pravatar.cc/32?u=1",
-  },
-  {
-    name: "Đinh Mạnh",
-    username: "dinhducmanhh",
-    avatar: "https://i.pravatar.cc/32?u=2",
-  },
-  {
-    name: "Nguyễn Linh",
-    username: "nguyenlinh.97",
-    avatar: "https://i.pravatar.cc/32?u=3",
-  },
-  {
-    name: "Minh Tú",
-    username: "minhtu.official",
-    avatar: "https://i.pravatar.cc/32?u=4",
-  },
-];
+import { useAppSelector } from "@/redux/hooks";
 
 export function AppSidebar() {
   const location = useLocation();
+  const currentUser = useAppSelector((state) => state.user.currentUser);
 
+  const navItems = [
+    { title: "Đề xuất", url: "/", icon: Home },
+    { title: "Đã follow", url: "/following", icon: UserCheck },
+    { title: "Bạn bè", url: "/friends", icon: Users },
+    { title: "Tin nhắn", url: "/messages", icon: Send },
+    { title: "Hoạt động", url: "/activity", icon: Bell, badge: 1 },
+    { title: "Hồ sơ", url: `/user/@${currentUser?.username}`, icon: User },
+    { title: "Thêm", url: "/more", icon: MoreHorizontal },
+  ];
+
+  const followingList = [
+    {
+      name: "Trần Bơm",
+      username: "tranbom.vcu",
+      avatar: "https://i.pravatar.cc/32?u=1",
+    },
+    {
+      name: "Đinh Mạnh",
+      username: "dinhducmanhh",
+      avatar: "https://i.pravatar.cc/32?u=2",
+    },
+    {
+      name: "Nguyễn Linh",
+      username: "nguyenlinh.97",
+      avatar: "https://i.pravatar.cc/32?u=3",
+    },
+    {
+      name: "Minh Tú",
+      username: "minhtu.official",
+      avatar: "https://i.pravatar.cc/32?u=4",
+    },
+  ];
   return (
     <Sidebar>
       <SidebarHeader className="mt-14 px-0 py-0"></SidebarHeader>
@@ -67,11 +66,11 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarMenu>
             {navItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
+              <SidebarMenuItem className="py-2" key={item.title}>
                 <SidebarMenuButton
                   asChild
                   isActive={location.pathname === item.url}
-                  className="relative h-11 text-base font-semibold
+                  className="relative h-10 text-base font-semibold
                   data-[active=true]:font-semibold
                   data-[active=true]:text-tiktok-red
                   data-[active=true]:[&_svg]:text-tiktok-red"

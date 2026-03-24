@@ -9,18 +9,20 @@ const AppRoutes = () => {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Layout chung */}
         <Route path="/" element={<DefaultLayout />}>
           <Route index element={<HomePage />} />
-          <Route
-            path="upload"
-            element={
-              <ProtectedRoute>
-                <UploadPage />
-              </ProtectedRoute>
-            }
-          />
           <Route path="user/:username" element={<ProfilePage />} />
         </Route>
+        {/* Layout riêng */}
+        <Route
+          path="upload"
+          element={
+            <ProtectedRoute>
+              <UploadPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

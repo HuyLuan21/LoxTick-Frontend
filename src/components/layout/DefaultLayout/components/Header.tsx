@@ -6,7 +6,7 @@ import { logout } from "@/redux/slices/authSlice";
 import { cn } from "@/lib/utils";
 import ResetModal from "../../../auth/ResetModal";
 import { Link } from "react-router-dom";
-// import { useSearchParams } from "react-router-dom";
+import { UserAvatar } from "@/components/Avavtar/userAvatar";
 
 interface HeaderProps {
   className?: string;
@@ -18,15 +18,13 @@ export default function Header({ className }: HeaderProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  // const [searchParams, setSearchParams] = useSearchParams();
-  // const resetToken = searchParams.get("token");
 
   const currentUser = useAppSelector(selectCurrentUser);
   return (
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 flex items-center justify-between px-6 z-50",
+          "fixed top-0 left-0 right-0 h-14 bg-background border-b border-gray-200 dark:border-zinc-700/90 flex items-center justify-between px-6 z-50",
           className,
         )}
       >
@@ -48,19 +46,19 @@ export default function Header({ className }: HeaderProps) {
               fill="#161823"
             />
           </svg>
-          <span className="text-2xl font-black tracking-tight text-[#161823]">
+          <span className="text-2xl font-black text-foreground tracking-tight ">
             LoxTick
           </span>
         </a>
 
         {/* Search */}
         <div
-          className={`flex items-center gap-2 bg-gray-100 rounded-full px-4 h-10 transition-all duration-200 ${searchFocused ? "ring-2 ring-gray-300 w-100" : "w-96"}`}
+          className={`flex items-center gap-2 w-96 bg-gray-100 dark:bg-[#1f1f1f] dark:caret-tiktok-red rounded-full px-4 h-10 transition-all duration-200 ${searchFocused ? "outline-2 outline-text-muted-foreground" : "outline-none"}`}
         >
           <input
             type="text"
             placeholder="Tìm kiếm"
-            className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder-gray-400"
+            className="flex-1 bg-transparent outline-none text-sm text-gray-800 dark:text-white placeholder-gray-400"
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
           />
@@ -77,9 +75,11 @@ export default function Header({ className }: HeaderProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 rounded-md text-sm font-semibold hover:bg-gray-50 transition">
-            Upload
-          </button>
+          <Link to="/upload">
+            <button className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:hover:bg-zinc-700/90 dark:bg-zinc-800 rounded-md text-sm font-semibold hover:bg-gray-50 transition">
+              Upload
+            </button>
+          </Link>
 
           {currentUser ? (
             <div className="relative">
@@ -88,9 +88,13 @@ export default function Header({ className }: HeaderProps) {
                 className="flex items-center gap-2 cursor-pointer"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
-                <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white font-bold text-sm">
-                  {currentUser?.display_name?.charAt(0).toUpperCase()}
-                </div>
+                <UserAvatar
+                  className="w-8 h-8"
+                  src={currentUser?.avatar_url}
+                  fallbackName={
+                    currentUser?.display_name || currentUser?.username
+                  }
+                />
               </div>
 
               {/* Dropdown */}
@@ -100,10 +104,10 @@ export default function Header({ className }: HeaderProps) {
                     className="fixed inset-0 z-40"
                     onClick={() => setShowDropdown(false)}
                   />
-                  <div className="absolute right-0 top-10 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                  <div className="absolute right-0 top-10 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden dark:bg-tiktok-dark-bg dark:border-tiktok-dark-border">
                     {/* Tên user */}
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-800">
+                    <div className="px-4 py-3 border-b border-gray-100 dark:border-tiktok-dark-border">
+                      <p className="text-sm font-semibold text-gray-800 dark:text-white">
                         {currentUser?.display_name || currentUser?.username}
                       </p>
                       <p className="text-xs text-gray-400 truncate">
@@ -114,7 +118,7 @@ export default function Header({ className }: HeaderProps) {
                     <Link to={`user/@${currentUser?.username}`}>
                       <button
                         onClick={() => setShowDropdown(false)}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-white hover:bg-gray-50 transition  dark:hover:bg-tiktok-dark-hover"
                       >
                         <svg
                           className="w-4 h-4"
@@ -139,7 +143,7 @@ export default function Header({ className }: HeaderProps) {
 
                         setShowDropdown(false);
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition"
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition dark:hover:bg-ti"
                     >
                       <svg
                         className="w-4 h-4"

@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,7 +64,11 @@ export function EditProfileModal({
     user.avatar_url ?? dicebearAvatar,
   );
   const [loading, setLoading] = useState(false);
-
+  const isDirty =
+    form.username !== (user.username ?? "") ||
+    form.display_name !== (user.display_name ?? "") ||
+    form.bio !== (user.bio ?? "") ||
+    form.avatar !== undefined;
   useEffect(() => {
     setForm({
       username: user.username ?? "",
@@ -120,6 +125,7 @@ export function EditProfileModal({
       <DialogContent className="max-h-[90dvh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Sửa hồ sơ</DialogTitle>
+          <DialogDescription className="hidden"></DialogDescription>
         </DialogHeader>
         <Separator />
 
@@ -238,7 +244,7 @@ export function EditProfileModal({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={loading}
+            disabled={loading || !isDirty}
             className="cursor-pointer bg-tiktok-red px-6 text-white hover:bg-tiktok-red/80"
           >
             {loading ? "Đang lưu..." : "Lưu"}

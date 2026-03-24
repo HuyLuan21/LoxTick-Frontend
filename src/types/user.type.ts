@@ -6,6 +6,7 @@ export interface User {
   avatar_url: string;
   bio?: string;
   role: string;
+  is_loading: boolean;
 }
 
 export interface UserProfile extends User {

@@ -6,8 +6,10 @@ import * as authService from "../../services/Api/authApi";
 // Define the initial state using that type
 const initialState: {
   currentUser: User | null;
+  is_loading: boolean;
 } = {
   currentUser: null,
+  is_loading: true,
 };
 
 export const authSlice = createSlice({

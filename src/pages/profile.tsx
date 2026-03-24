@@ -4,8 +4,8 @@ import { userServices } from "@/services/userServices";
 import { useAppSelector } from "@/redux/hooks";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,16 +13,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Bookmark,
   ChevronDown,
-  Grid2X2,
   Heart,
   Loader2,
   MessageCircle,
   MoreHorizontal,
   Pencil,
-  Pin,
-  Play,
+  // Pin,
+  // Play,
   Repeat2,
+  SquarePlay,
   UserPlus,
 } from "lucide-react";
 import { createAvatar } from "@dicebear/core";
@@ -30,86 +31,7 @@ import { lorelei } from "@dicebear/collection";
 import { EditProfileModal } from "@/components/auth/EditProfileModal";
 import type { UserProfile } from "@/types/user.type";
 
-// ─── Types ──────────────────────────────────────────────────────────────────────
-
 type SortType = "Mới nhất" | "Thịnh Hành" | "Cũ nhất";
-
-interface Video {
-  id: number;
-  views: string;
-  pinned?: boolean;
-  color: string;
-  emoji: string;
-}
-
-// ─── Mock Data ──────────────────────────────────────────────────────────────────
-
-const mockVideos: Video[] = [
-  { id: 1, views: "105.3K", pinned: true, color: "bg-amber-950", emoji: "🏫" },
-  { id: 2, views: "6,296", pinned: true, color: "bg-emerald-950", emoji: "📊" },
-  { id: 3, views: "83.3K", pinned: true, color: "bg-rose-950", emoji: "👩‍💼" },
-  { id: 4, views: "2,001", color: "bg-blue-950", emoji: "🌙" },
-  { id: 5, views: "3,304", color: "bg-orange-950", emoji: "💐" },
-  { id: 6, views: "2,321", color: "bg-pink-950", emoji: "🌹" },
-  { id: 7, views: "1,872", color: "bg-purple-950", emoji: "🎀" },
-  { id: 8, views: "4,410", color: "bg-green-950", emoji: "🌿" },
-  { id: 9, views: "990", color: "bg-yellow-950", emoji: "☕" },
-  { id: 10, views: "7,823", color: "bg-cyan-950", emoji: "🏙️" },
-  { id: 11, views: "5,512", color: "bg-zinc-900", emoji: "🪞" },
-  { id: 12, views: "12.1K", color: "bg-violet-950", emoji: "🎵" },
-];
-
-// ─── VideoCard ──────────────────────────────────────────────────────────────────
-
-function VideoCard({ video }: { video: Video }) {
-  return (
-    <div className="group relative aspect-9/16 cursor-pointer overflow-hidden rounded-sm">
-      <div
-        className={`${video.color} flex h-full w-full items-center justify-center text-5xl`}
-      >
-        {video.emoji}
-      </div>
-
-      <div className="absolute inset-0 bg-black/20 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-
-      {video.pinned && (
-        <Badge className="absolute left-2 top-2 flex items-center gap-1 rounded-sm bg-tiktok-red px-1.5 py-0.5 text-[10px] font-bold text-white hover:bg-tiktok-red">
-          <Pin className="h-2.5 w-2.5" />
-          Đã ghim
-        </Badge>
-      )}
-
-      <div className="absolute bottom-2 left-2 flex items-center gap-1 text-xs font-semibold text-white drop-shadow-lg">
-        <Play className="h-3 w-3 fill-white" />
-        {video.views}
-      </div>
-    </div>
-  );
-}
-
-// ─── VideoGrid ──────────────────────────────────────────────────────────────────
-
-function VideoGrid({ videos, sort }: { videos: Video[]; sort: SortType }) {
-  const sorted = [...videos].sort((a, b) => {
-    if (sort === "Cũ nhất") return a.id - b.id;
-    if (sort === "Thịnh Hành") {
-      const parse = (v: string) =>
-        parseFloat(v.replace(/[^0-9.]/g, "")) * (v.includes("K") ? 1000 : 1);
-      return parse(b.views) - parse(a.views);
-    }
-    return b.id - a.id;
-  });
-
-  return (
-    <div className="mt-0.5 grid grid-cols-2 gap-0.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-      {sorted.map((video) => (
-        <VideoCard key={video.id} video={video} />
-      ))}
-    </div>
-  );
-}
-
-// ─── ProfilePage ────────────────────────────────────────────────────────────────
 
 const ProfilePage = () => {
   const { username } = useParams<{ username: string }>();
@@ -122,7 +44,6 @@ const ProfilePage = () => {
   const [sort, setSort] = useState<SortType>("Mới nhất");
   const [editOpen, setEditOpen] = useState(false);
 
-
   const dicebearAvatar = useMemo(
     () =>
       createAvatar(lorelei, {
@@ -133,7 +54,6 @@ const ProfilePage = () => {
   );
 
   const isOwner = !!currentUser && currentUser.username === user?.username;
-
   useEffect(() => {
     if (!username) return;
     setLoading(true);
@@ -310,11 +230,14 @@ const ProfilePage = () => {
         {/* Tabs */}
         <Tabs defaultValue="videos" className="w-full">
           <div className="flex items-center justify-between border-b border-border">
-            <TabsList className="h-auto gap-0 bg-transparent p-0">
+            <TabsList
+              variant="line"
+              className="h-auto gap-0 bg-transparent p-0"
+            >
               {[
                 {
                   value: "videos",
-                  icon: <Grid2X2 className="h-4 w-4" />,
+                  icon: <SquarePlay className="h-4 w-4" />,
                   label: "Video",
                 },
                 {
@@ -327,17 +250,16 @@ const ProfilePage = () => {
                   icon: <Heart className="h-4 w-4" />,
                   label: "Đã thích",
                 },
+                {
+                  value: "bookmarked",
+                  icon: <Bookmark className="h-4 w-4" />,
+                  label: "Đã lưu",
+                },
               ].map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="
-                    flex cursor-pointer items-center gap-2 rounded-none border-b-2
-                    border-transparent bg-transparent px-5 py-3 text-sm font-medium
-                    text-muted-foreground transition-colors hover:text-foreground/70
-                    data-[state=active]:border-foreground data-[state=active]:bg-transparent
-                    data-[state=active]:text-foreground data-[state=active]:shadow-none
-                  "
+                  className="px-4 font-semibold text-lg"
                 >
                   {tab.icon}
                   {tab.label}
@@ -376,16 +298,6 @@ const ProfilePage = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
-          <TabsContent value="videos" className="mt-0">
-            <VideoGrid videos={mockVideos} sort={sort} />
-          </TabsContent>
-          <TabsContent value="repost" className="mt-0">
-            <VideoGrid videos={[...mockVideos].reverse()} sort={sort} />
-          </TabsContent>
-          <TabsContent value="liked" className="mt-0">
-            <VideoGrid videos={mockVideos.slice(0, 8)} sort={sort} />
-          </TabsContent>
         </Tabs>
       </div>
     </div>
