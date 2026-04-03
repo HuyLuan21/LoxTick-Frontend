@@ -3,18 +3,14 @@ import type { Dispatch, PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
 import * as authService from "../../services/Api/authApi";
 
-// Define the initial state using that type
 const initialState: {
   currentUser: User | null;
-  is_loading: boolean;
 } = {
   currentUser: null,
-  is_loading: true,
 };
 
 export const authSlice = createSlice({
   name: "auth",
-  // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
     setCurrentUser(state, action: PayloadAction<User | null>) {

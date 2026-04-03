@@ -7,12 +7,9 @@ const DefaultLayout = () => {
   return (
     <div className="flex flex-col h-screen">
       <Header className="h-14" />
-      <SidebarProvider
-        style={{ minHeight: "unset" }}
-        className="flex flex-1 overflow-hidden"
-      >
+      <SidebarProvider className="flex flex-1 pt-14 overflow-hidden">
         <AppSidebar />
-        <main className="flex-1 overflow-y-auto mt-14">
+        <main className="flex-1 overflow-y-auto">
           <Outlet />
         </main>
       </SidebarProvider>

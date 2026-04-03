@@ -7,11 +7,6 @@ interface Props {
 
 export default function ProtectedRoute({ children }: Props) {
   const currentUser = useSelector((state: any) => state.user.currentUser);
-  const isLoading = useSelector((state: any) => state.user.is_loading);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   if (!currentUser) {
     return <Navigate to="/" replace />;

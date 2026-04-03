@@ -10,9 +10,15 @@ import { UserAvatar } from "@/components/Avavtar/userAvatar";
 
 interface HeaderProps {
   className?: string;
+  isShowSearch?: boolean;
+  isShowUpload?: boolean;
 }
 
-export default function Header({ className }: HeaderProps) {
+export default function Header({
+  className,
+  isShowSearch = true,
+  isShowUpload = true,
+}: HeaderProps) {
   const dispatch = useAppDispatch();
   const [showReset, setShowReset] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -47,39 +53,47 @@ export default function Header({ className }: HeaderProps) {
             />
           </svg>
           <span className="text-2xl font-black text-foreground tracking-tight ">
-            LoxTick
+            LoxTik
           </span>
         </a>
 
         {/* Search */}
-        <div
-          className={`flex items-center gap-2 w-96 bg-gray-100 dark:bg-[#1f1f1f] dark:caret-tiktok-red rounded-full px-4 h-10 transition-all duration-200 ${searchFocused ? "outline-2 outline-text-muted-foreground" : "outline-none"}`}
-        >
-          <input
-            type="text"
-            placeholder="Tìm kiếm"
-            className="flex-1 bg-transparent outline-none text-sm text-gray-800 dark:text-white placeholder-gray-400"
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-          />
-          <svg
-            className="w-4 h-4 text-gray-400 shrink-0"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        {isShowSearch && (
+          <div
+            className={`flex items-center gap-2 w-96 bg-gray-100 dark:bg-[#1f1f1f] dark:caret-tiktok-red rounded-full px-4 h-10 transition-all duration-200 ${searchFocused ? "outline-2 outline-text-muted-foreground" : "outline-none"}`}
           >
-            <circle cx="11" cy="11" r="8" strokeWidth="2" />
-            <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </div>
+            <input
+              type="text"
+              placeholder="Tìm kiếm"
+              className="flex-1 bg-transparent outline-none text-sm text-gray-800 dark:text-white placeholder-gray-400"
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+            />
+            <svg
+              className="w-4 h-4 text-gray-400 shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <circle cx="11" cy="11" r="8" strokeWidth="2" />
+              <path
+                d="M21 21l-4.35-4.35"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Link to="/upload">
-            <button className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:hover:bg-zinc-700/90 dark:bg-zinc-800 rounded-md text-sm font-semibold hover:bg-gray-50 transition">
-              Upload
-            </button>
-          </Link>
+          {isShowUpload && (
+            <Link to="/upload">
+              <button className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:hover:bg-zinc-700/90 dark:bg-zinc-800 rounded-md text-sm font-semibold hover:bg-gray-50 transition">
+                Upload
+              </button>
+            </Link>
+          )}
 
           {currentUser ? (
             <div className="relative">
@@ -88,13 +102,7 @@ export default function Header({ className }: HeaderProps) {
                 className="flex items-center gap-2 cursor-pointer"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
-                <UserAvatar
-                  className="w-8 h-8"
-                  src={currentUser?.avatar_url}
-                  fallbackName={
-                    currentUser?.display_name || currentUser?.username
-                  }
-                />
+                <UserAvatar className="w-8 h-8" />
               </div>
 
               {/* Dropdown */}
@@ -115,7 +123,7 @@ export default function Header({ className }: HeaderProps) {
                       </p>
                     </div>
                     {/* Xem hồ sơ */}
-                    <Link to={`user/@${currentUser?.username}`}>
+                    <Link to={`/user/@${currentUser?.username}`}>
                       <button
                         onClick={() => setShowDropdown(false)}
                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-white hover:bg-gray-50 transition  dark:hover:bg-tiktok-dark-hover"
