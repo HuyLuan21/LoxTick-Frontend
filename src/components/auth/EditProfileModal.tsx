@@ -60,7 +60,7 @@ export function EditProfileModal({
     display_name: user.display_name ?? "",
     bio: user.bio ?? "",
   });
-  const [avatarPreview, setAvatarPreview] = useState<string>(
+  const [, setAvatarPreview] = useState<string>(
     user.avatar_url ?? dicebearAvatar,
   );
   const [loading, setLoading] = useState(false);
