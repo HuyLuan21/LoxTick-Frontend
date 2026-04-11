@@ -2,7 +2,6 @@ import Header from "../DefaultLayout/components/Header";
 import uploadIcon from "@/assets/upload.svg";
 import { Textarea } from "@/components/ui/textarea";
 import { useRef, useState } from "react";
-// import type { Video } from "@/types/video.types";
 import { Button } from "@/components/ui/button";
 import VideoPreview from "@/components/video/VideoPreview";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { uploadToCloudinary, uploadVideo } from "@/services/Api/Upload";
 
 interface IFile extends File {
   preview?: string;
@@ -24,43 +24,21 @@ interface IFile extends File {
 
 const UploadLayout = () => {
   const inputFileRef = useRef<HTMLInputElement>(null);
-
-  const [, setIsDragging] = useState(false);
-  // const [video, setVideo] = useState<Video | null>(null);
+  const inputImageRef = useRef<HTMLInputElement>(null);
+  const [imageFile, setImageFile] = useState<IFile | null>(null);
   const [videoFile, setVideoFile] = useState<IFile | null>(null);
   const [inputLength, setInputLength] = useState(0);
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-
-    const files = e.dataTransfer.files;
-    console.log(files);
-
-    if (files.length > 0) {
-      const file = files[0];
-      console.log(file.name);
-    }
-  };
-
+  const [isUploading, setIsUploading] = useState(false);
   return (
-    <div className="flex flex-col">
+    <div className={`flex flex-col ${videoFile ? "" : "h-screen"}`}>
       <Header className="h-14" isShowSearch={false} isShowUpload={false} />
       <div className="flex-1 h-full">
         <div className="p-8 h-full bg-[#faf9f9]">
           {/* Vùng drag and drop */}
           <div
-            className={`w-full h-300px p-4 bg-[#FFF] rounded-md shadow-sm border border-gray-200 dark:border-zinc-700/90 mb-4 ${videoFile ? "hidden" : "visible"}`}
+            className={`w-full h-full p-4 bg-[#FFF] rounded-md shadow-sm border border-gray-200 dark:border-zinc-700/90 mb-4 ${videoFile ? "hidden" : "visible"}`}
           >
             <div
-              onDragOver={handleDragOver}
-              onDragEnter={() => setIsDragging(true)}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
               onClick={() => {
                 inputFileRef.current?.click();
               }}
@@ -72,24 +50,23 @@ const UploadLayout = () => {
                 className="hidden"
                 ref={inputFileRef}
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
+                  const file = e.target.files?.[0] as IFile;
                   if (file) {
                     console.log(file);
+
                     const preview = URL.createObjectURL(file);
-                    setVideoFile({
-                      ...file,
-                      preview,
-                    });
+
+                    file.preview = preview;
+
+                    setVideoFile(file);
                   }
                 }}
               />
-              <div className="flex flex-col items-center">
+              <div className="flex my-5 flex-col items-center">
                 <img src={uploadIcon} alt="" />
-                <div className="flex flex-col items-center">
-                  <p className="text-2xl font-semibold dark:text-white mt-2">
-                    Chọn video để tải lên
-                  </p>
-                </div>
+                <p className="text-2xl font-semibold dark:text-white mt-2">
+                  Chọn video để tải lên
+                </p>
                 <div className="flex flex-col items-center w-full">
                   <p className="text-sm mt-4 text-gray-400">
                     Hoặc kéo thả vào đây
@@ -107,8 +84,9 @@ const UploadLayout = () => {
               </div>
             </div>
           </div>
+
           {/* Vùng hiển thị video */}
-          <div className="bg-[#faf9f9]">
+          <div className={`${videoFile ? "bg-[#faf9f9]" : "hidden"}`}>
             <div className="text-lg font-semibold">Chi tiết</div>
             <div className="flex mt-2 mb-4 gap-4">
               <div className="flex-7 flex flex-col gap-6">
@@ -137,30 +115,85 @@ const UploadLayout = () => {
                   <div className="flex text-sm font-semibold mb-4">Ảnh bìa</div>
                   <div className="flex gap-5">
                     <div className="w-27 shrink-0">
-                      <div className="w-27 h-37 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-gray-100 transition-colors">
-                        <svg
-                          width="22"
-                          height="22"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <path
-                            d="M12 5v14M5 12h14"
-                            stroke="#FE2C55"
-                            strokeWidth="2"
-                            strokeLinecap="round"
+                      {/* Vùng upload / preview */}
+                      <div
+                        onClick={() => inputImageRef.current?.click()}
+                        className="w-27 h-37 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-gray-100 transition-colors overflow-hidden"
+                      >
+                        {imageFile ? (
+                          // Có ảnh → hiện preview
+                          <img
+                            src={imageFile.preview}
+                            alt="Ảnh bìa"
+                            className="w-full h-full object-cover"
                           />
-                        </svg>
-                        <span className="text-xs text-gray-400">9:16</span>
+                        ) : (
+                          <>
+                            <svg
+                              width="22"
+                              height="22"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <path
+                                d="M12 5v14M5 12h14"
+                                stroke="#FE2C55"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                            <span className="text-xs text-gray-400">9:16</span>
+                          </>
+                        )}
+
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          ref={inputImageRef}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] as IFile;
+                            if (file) {
+                              const preview = URL.createObjectURL(file);
+
+                              file.preview = preview;
+
+                              setImageFile(file);
+                              console.log(file);
+                            }
+                          }}
+                        />
                       </div>
+
+                      {/* Nút xóa ảnh nếu đã chọn */}
+                      {imageFile && (
+                        <button
+                          onClick={() => {
+                            if (imageFile.preview) {
+                              URL.revokeObjectURL(imageFile.preview);
+                            }
+                            setImageFile(null);
+                            if (inputImageRef.current) {
+                              inputImageRef.current.value = "";
+                            }
+                          }}
+                          className="mt-1.5 w-full text-xs text-gray-400 hover:text-red-500 transition-colors text-center"
+                        >
+                          Xóa ảnh
+                        </button>
+                      )}
                     </div>
+
                     <div className="flex-1 pt-1">
                       <p className="text-sm text-gray-500 mb-3.5 leading-relaxed">
                         Chọn ảnh bìa hấp dẫn để thu hút người xem.
                         <br />
                         LoxTik sẽ tự động đề xuất ảnh bìa từ video của bạn.
                       </p>
-                      <Button className="bg-[#FE2C55] text-white text-sm font-medium px-3.5 py-1.5 rounded-md cursor-pointer hover:bg-[#e0264c] transition-colors">
+                      <Button
+                        onClick={() => inputImageRef.current?.click()}
+                        className="bg-[#FE2C55] text-white text-sm font-medium px-3.5 py-1.5 rounded-md cursor-pointer hover:bg-[#e0264c] transition-colors"
+                      >
                         Tải ảnh bìa lên
                       </Button>
                     </div>
@@ -195,6 +228,7 @@ const UploadLayout = () => {
 
                           <div className="flex items-center gap-3">
                             <RadioGroupItem
+                              disabled
                               value="comfortable"
                               id="r2"
                               className="
@@ -245,7 +279,7 @@ const UploadLayout = () => {
                               </DropdownMenuRadioItem>
                               <DropdownMenuRadioItem
                                 value="friends"
-                                className="px-3 py-2 rounded-md cursor-pointer hover:bg-gray-100"
+                                className="py-2 rounded-md cursor-pointer hover:bg-gray-100"
                               >
                                 <div className="flex flex-col">
                                   <span>Bạn bè</span>
@@ -303,8 +337,15 @@ const UploadLayout = () => {
                 </div>
                 {/* Nút đăng video */}
                 <div className="flex justify-start gap-2">
-                  <Button className="bg-[#FE2C55] text-white text-sm font-medium px-3.5 py-1.5 rounded-md cursor-pointer hover:bg-[#e0264c] transition-colors">
-                    Đăng video
+                  <Button
+                    disabled={isUploading || !videoFile}
+                    onClick={async () => {
+                      const video = await uploadToCloudinary(videoFile!);
+                      await uploadVideo(video);
+                    }}
+                    className="bg-[#FE2C55] text-white text-sm font-medium px-3.5 py-1.5 rounded-md cursor-pointer hover:bg-[#e0264c] transition-colors"
+                  >
+                    {isUploading ? "Đang tải lên..." : "Đăng video"}
                   </Button>
                   <Button
                     className="hover:bg-gray-300 bg-gray-200"

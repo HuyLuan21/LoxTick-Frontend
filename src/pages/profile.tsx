@@ -129,10 +129,11 @@ const ProfilePage = () => {
                     user={user}
                     onSave={async (data) => {
                       const res = await userServices.updateProfile(data);
+                      console.log(res);
                       if (res.user && res.user.username !== user.username) {
                         window.location.href = `/user/@${res.user.username}`;
                       } else {
-                        window.location.reload();
+                        // window.location.reload();
                       }
                     }}
                   />

@@ -92,7 +92,7 @@ export function EditProfileModal({
 
       if (form.avatar) {
         const result = await uploadToCloudinary(form.avatar); // ← gọi Cloudinary
-        avatarUrl = result.secure_url;
+        avatarUrl = result.url;
       }
 
       await onSave({
