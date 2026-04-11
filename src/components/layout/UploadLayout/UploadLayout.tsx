@@ -340,8 +340,11 @@ const UploadLayout = () => {
                   <Button
                     disabled={isUploading || !videoFile}
                     onClick={async () => {
+                      setIsUploading(true);
                       const video = await uploadToCloudinary(videoFile!);
                       await uploadVideo(video);
+                      setIsUploading(false);
+                      window.location.href = "/";
                     }}
                     className="bg-[#FE2C55] text-white text-sm font-medium px-3.5 py-1.5 rounded-md cursor-pointer hover:bg-[#e0264c] transition-colors"
                   >
