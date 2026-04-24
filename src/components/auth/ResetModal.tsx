@@ -79,7 +79,7 @@ export default function ResetModal({
     }
   };
 
-  // Gộp verify OTP + đổi mật khẩu vào 1 nút
+ 
   const handleSubmit = async () => {
     if (!otpSent) {
       setError("Vui lòng gửi mã OTP trước!");

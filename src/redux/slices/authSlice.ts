@@ -1,7 +1,7 @@
 import type { User } from "@/types/user.type";
 import type { Dispatch, PayloadAction } from "@reduxjs/toolkit";
 import { createSlice } from "@reduxjs/toolkit";
-import * as authService from "../../services/Api/authApi";
+import * as authService from "@/services/authService";
 
 const initialState: {
   currentUser: User | null;
@@ -34,7 +34,7 @@ export const getCurrentUser = () => {
 export const logout = () => {
   return async (dispatch: Dispatch) => {
     try {
-      await authService.logoutApi();
+      await authService.logout();
       localStorage.removeItem("access_token");
       dispatch(setCurrentUser(null));
     } catch (_) {

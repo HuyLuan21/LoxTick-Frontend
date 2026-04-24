@@ -13,4 +13,11 @@ export const updateProfile = async (
   const response = await axiosInstance.put("/users/me", data);
   return response.data;
 };
-
+// export const getFollowingList = async (): Promise<UserProfile[]> => {
+//   const response = await axiosInstance.get("/users/me/following");
+//   return response.data;
+// };
+// export const getFollowersList = async (): Promise<UserProfile[]> => {
+//   const response = await axiosInstance.get("/users/me/followers");
+//   return response.data;
+// };

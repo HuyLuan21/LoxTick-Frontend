@@ -10,18 +10,11 @@ import { UserAvatar } from "@/components/Avavtar/userAvatar";
 
 interface HeaderProps {
   className?: string;
-  isShowSearch?: boolean;
-  isShowUpload?: boolean;
 }
 
-export default function Header({
-  className,
-  isShowSearch = true,
-  isShowUpload = true,
-}: HeaderProps) {
+export default function Header({ className }: HeaderProps) {
   const dispatch = useAppDispatch();
   const [showReset, setShowReset] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -57,7 +50,7 @@ export default function Header({
           </span>
         </a>
 
-        {/* Search */}
+        {/* Search
         {isShowSearch && (
           <div
             className={`flex items-center gap-2 w-96 bg-gray-100 dark:bg-[#1f1f1f] dark:caret-tiktok-red rounded-full px-4 h-10 transition-all duration-200 ${searchFocused ? "outline-2 outline-text-muted-foreground" : "outline-none"}`}
@@ -83,17 +76,16 @@ export default function Header({
               />
             </svg>
           </div>
-        )}
+        )} */}
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {isShowUpload && (
-            <Link to="/upload">
-              <button className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:hover:bg-zinc-700/90 dark:bg-zinc-800 rounded-md text-sm font-semibold hover:bg-gray-50 transition">
-                Upload
-              </button>
-            </Link>
-          )}
+          {/* {isShowUpload && ( */}
+          <Link to="/upload">
+            <button className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 dark:border-zinc-700 dark:hover:bg-zinc-700/90 dark:bg-zinc-800 rounded-md text-sm font-semibold hover:bg-gray-50 transition">
+              Upload
+            </button>
+          </Link>
 
           {currentUser ? (
             <div className="relative">
@@ -102,7 +94,7 @@ export default function Header({
                 className="flex items-center gap-2 cursor-pointer"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
-                <UserAvatar className="w-8 h-8" />
+                <UserAvatar className="w-8 h-8" UserProfile={currentUser} />
               </div>
 
               {/* Dropdown */}

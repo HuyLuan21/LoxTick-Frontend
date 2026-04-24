@@ -31,7 +31,7 @@ const UploadLayout = () => {
   const [isUploading, setIsUploading] = useState(false);
   return (
     <div className={`flex flex-col ${videoFile ? "" : "h-screen"}`}>
-      <Header className="h-14" isShowSearch={false} isShowUpload={false} />
+      <Header className="h-14" />
       <div className="flex-1 h-full">
         <div className="p-8 h-full bg-[#faf9f9]">
           {/* Vùng drag and drop */}
@@ -344,7 +344,6 @@ const UploadLayout = () => {
                       const video = await uploadToCloudinary(videoFile!);
                       await uploadVideo(video);
                       setIsUploading(false);
-                      window.location.href = "/";
                     }}
                     className="bg-[#FE2C55] text-white text-sm font-medium px-3.5 py-1.5 rounded-md cursor-pointer hover:bg-[#e0264c] transition-colors"
                   >

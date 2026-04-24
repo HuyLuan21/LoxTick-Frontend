@@ -13,6 +13,7 @@ export interface UserProfile extends User {
   followers?: number;
   following?: number;
   likes?: number;
+  is_following?: boolean;
 }
 
 export interface UpdateProfilePayload {
@@ -25,4 +26,10 @@ export interface UpdateProfilePayload {
 export interface LoginResponse {
   token: string;
   user: User;
+}
+export interface FollowingList {
+  following_user_id: number;
+  display_name: string;
+  avatar_url: string;
+  username: string;
 }

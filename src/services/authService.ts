@@ -1,41 +1,151 @@
-import {
-  forgotPasswordApi,
-  loginApi,
-  registerApi,
-  resetPasswordApi,
-  verifyOtpApi,
-} from "./Api/authApi";
+// ==========================
+// 📦 IMPORTS
+// ==========================
+import axiosInstance from "@/services/axiosInstance";
 import { saveToken, removeToken } from "./tokenService";
-import type { User } from "../types/user.type";
+import type { LoginResponse, User } from "@/types/user.type";
 
+// ==========================
+// 📦 API LAYER (chỉ call backend)
+// ==========================
+
+// 🔐 Login API
+const loginApi = async (
+  email: string,
+  password: string,
+): Promise<LoginResponse> => {
+  const response = await axiosInstance.post<LoginResponse>("/auth/login", {
+    email,
+    password,
+  });
+  return response.data;
+};
+
+// 📝 Register API
+const registerApi = async (
+  username: string,
+  email: string,
+  password: string,
+): Promise<LoginResponse> => {
+  const response = await axiosInstance.post<LoginResponse>("/auth/register", {
+    username,
+    email,
+    password,
+  });
+  return response.data;
+};
+
+// 👤 Get current user
+const getCurrentUserApi = async (): Promise<User> => {
+  const response = await axiosInstance.get("/auth/me");
+  return response.data;
+};
+
+// 🚪 Logout API
+const logoutApi = async () => {
+  await axiosInstance.post("/auth/logout");
+};
+
+// 🔁 Forgot password
+const forgotPasswordApi = async (email: string) => {
+  const response = await axiosInstance.post("/auth/forgot-password", { email });
+  return response.data;
+};
+
+// 🔑 Verify OTP
+const verifyOtpApi = async (otp: string) => {
+  const response = await axiosInstance.post("/auth/verify-otp", { otp });
+  return response.data;
+};
+
+// 🔒 Reset password
+const resetPasswordApi = async (otp: string, password: string) => {
+  const response = await axiosInstance.post("/auth/reset-password", {
+    otp,
+    password,
+  });
+  return response.data;
+};
+
+// ==========================
+// 📦 SERVICE LAYER (business logic)
+// ==========================
+
+// 🔐 Login
 export const login = async (email: string, password: string): Promise<User> => {
-  const data = await loginApi(email, password);
-  saveToken(data.token);
-  return data.user;
+  try {
+    const data = await loginApi(email, password);
+
+    // 💾 Lưu token vào localStorage / cookie
+    saveToken(data.token);
+
+    return data.user;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Login failed");
+  }
 };
 
-export const logout = () => {
-  removeToken();
-};
-
+// 📝 Register
 export const register = async (
   username: string,
   email: string,
   password: string,
 ): Promise<User> => {
-  const data = await registerApi(username, email, password);
-  saveToken(data.token);
-  return data.user;
+  try {
+    const data = await registerApi(username, email, password);
+
+    // 💾 Auto login sau khi register
+    saveToken(data.token);
+
+    return data.user;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Register failed");
+  }
 };
+
+// 👤 Get current user
+export const getCurrentUser = async (): Promise<User> => {
+  try {
+    return await getCurrentUserApi();
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Fetch user failed");
+  }
+};
+
+// 🚪 Logout
+export const logout = async () => {
+  try {
+    // gọi backend (nếu có session / refresh token)
+    await logoutApi();
+  } finally {
+    // luôn xoá token dù API có lỗi
+    removeToken();
+  }
+};
+
+// 🔁 Forgot password
 export const forgotPassword = async (email: string) => {
-  const data = await forgotPasswordApi(email);
-  return data;
+  try {
+    return await forgotPasswordApi(email);
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Request failed");
+  }
 };
-export const resetPassword = async (otp: string, password: string) => {
-  const data = await resetPasswordApi(otp, password);
-  return data;
-};
+
+// 🔑 Verify OTP
 export const verifyOtp = async (otp: string) => {
-  const data = await verifyOtpApi(otp);
-  return data;
+  try {
+    return await verifyOtpApi(otp);
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "OTP invalid");
+  }
+};
+
+// 🔒 Reset password
+export const resetPassword = async (otp: string, password: string) => {
+  try {
+    return await resetPasswordApi(otp, password);
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Reset failed");
+  }
 };

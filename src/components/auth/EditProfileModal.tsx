@@ -137,7 +137,7 @@ export function EditProfileModal({
             </Label>
             <div className="flex flex-1 justify-center">
               <div className="relative inline-block">
-                <UserAvatar className="h-20 w-20" />
+                <UserAvatar UserProfile={user} className="h-20 w-20" />
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}

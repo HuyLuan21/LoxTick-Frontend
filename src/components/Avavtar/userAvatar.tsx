@@ -3,28 +3,31 @@ import { createAvatar } from "@dicebear/core";
 import { lorelei } from "@dicebear/collection";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import { useAppSelector } from "@/redux/hooks";
-import { selectCurrentUser } from "@/redux/selector";
+import type { UserProfile } from "@/types/user.type";
 
-export function UserAvatar({ className }: { className?: string }) {
-  const currentUser = useAppSelector(selectCurrentUser);
-
+export function UserAvatar({
+  className,
+  UserProfile,
+}: {
+  className?: string;
+  UserProfile: UserProfile | null;
+}) {
   const dicebearAvatar = useMemo(
     () =>
       createAvatar(lorelei, {
-        seed: currentUser?.username ?? "default",
+        seed: UserProfile?.username ?? "default",
         size: 128,
       }).toDataUri(),
-    [currentUser?.username],
+    [UserProfile?.username],
   );
 
   return (
     <Avatar className={cn("h-20 w-20", className)}>
-      <AvatarImage src={currentUser?.avatar_url} />
+      <AvatarImage src={UserProfile?.avatar_url} />
       <AvatarFallback>
         <img
           src={dicebearAvatar}
-          alt={currentUser?.display_name || currentUser?.username}
+          alt={UserProfile?.display_name || UserProfile?.username}
           className="h-full w-full"
         />
       </AvatarFallback>
