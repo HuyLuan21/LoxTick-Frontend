@@ -1,7 +1,9 @@
+import DropdownMenu from "@/components/layout/DefaultLayout/components/DropdownMenu";
+
 const FollowingPage = () => {
   return (
     <div>
-      <h1>Following</h1>
+      <DropdownMenu />
     </div>
   );
 };

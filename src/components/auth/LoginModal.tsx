@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  // DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -11,10 +10,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { login, register } from "@/services/authService";
+import { login } from "@/services/authService";
 import { useState } from "react";
 import { getCurrentUser } from "@/redux/slices/authSlice";
 import { useAppDispatch } from "@/redux/hooks";
+import RegisterModal from "./RegisterModal";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -46,13 +46,14 @@ export default function LoginModal({
               onForgot={onForgot}
             />
           ) : (
-            <RegisterForm key="register" onSwitch={() => setMode("login")} />
+            <RegisterModal key="register" onSwitch={() => setMode("login")} />
           )}
         </DialogContent>
       </Dialog>
     </>
   );
 }
+
 function LoginForm({
   onClose,
   onSwitch,
@@ -149,100 +150,6 @@ function LoginForm({
           >
             Đăng ký
           </a>
-        </p>
-      </DialogFooter>
-    </>
-  );
-}
-function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const handleSubmit = async () => {
-    if (!username || !email || !password) {
-      setError("Vui lòng nhập đầy đủ!");
-      return;
-    }
-    try {
-      setLoading(true);
-      setError("");
-      await register(username, email, password);
-      onSwitch();
-      window.location.href = "/";
-    } catch {
-      setError("Email đã tồn tại hoặc có lỗi xảy ra!");
-    } finally {
-      setLoading(false);
-    }
-  };
-  return (
-    <>
-      <DialogHeader>
-        <DialogTitle className="text-2xl tracking-tight text-[#161823]">
-          Đăng ký tài khoản LoxTick
-        </DialogTitle>
-        <DialogDescription>
-          Nhập thông tin để tạo tài khoản mới.
-        </DialogDescription>
-      </DialogHeader>
-
-      <FieldGroup className="my-4">
-        <Field>
-          <Label htmlFor="username">Tên đăng nhập</Label>
-          <Input
-            id="username"
-            type="text"
-            placeholder="huandaden.penguin"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </Field>
-
-        <Field>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Field>
-
-        <Field>
-          <Label htmlFor="password">Mật khẩu</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </Field>
-      </FieldGroup>
-
-      {/* Error */}
-      {error && <p className="text-sm text-red-500 -mt-2">{error}</p>}
-
-      <Button
-        className="w-full bg-tiktok-red hover:bg-tiktok-red/80"
-        onClick={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? "Đang xử lý..." : "Đăng ký"}
-      </Button>
-
-      <DialogFooter className="justify-center! sm:justify-center!">
-        <p className="text-sm text-muted-foreground">
-          Đã có tài khoản?{" "}
-          <button
-            className="text-tiktok-red hover:underline font-medium"
-            onClick={onSwitch}
-          >
-            Đăng nhập
-          </button>
         </p>
       </DialogFooter>
     </>

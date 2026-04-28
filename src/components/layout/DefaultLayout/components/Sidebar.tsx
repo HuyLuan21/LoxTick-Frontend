@@ -9,16 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from "react-router";
-import {
-  Home,
-  Users,
-  UserCheck,
-  Send,
-  Bell,
-  MoreHorizontal,
-  Upload,
-} from "lucide-react";
+import { Link, NavLink, useLocation } from "react-router";
 import { UserAvatar } from "@/components/Avavtar/userAvatar";
 import { useAppSelector } from "@/redux/hooks";
 import { userServices } from "@/services/userServices";
@@ -26,14 +17,31 @@ import { useEffect, useState } from "react";
 import type { UserProfile } from "@/types/user.type";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  NotificationIcon,
+  NotificationActiveIcon,
+  FollowIcon,
+  FollowActiveIcon,
+  FriendsIcon,
+  FriendsActiveIcon,
+  HomeIcon,
+  HomeActiveIcon,
+  MessageIcon,
+  MessageActiveIcon,
+  MoreIcon,
+  UploadIcon,
+} from "@/components/Icons/Icons";
 
 export function AppSidebar() {
   const location = useLocation();
   const currentUser = useAppSelector((state) => state.user.currentUser);
-
+  // const [openModal, setOpenModal] = useState(false);
   const [following, setFollowing] = useState<UserProfile[]>([]);
   useEffect(() => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id) {
+      setFollowing([]);
+      return;
+    }
     let isMounted = true;
     userServices
       .getFollowingList(currentUser.id, 5)
@@ -48,21 +56,92 @@ export function AppSidebar() {
       isMounted = false;
     };
   }, [currentUser?.id]);
-
-  const navItems = [
-    { title: "Đề xuất", url: "/", icon: Home },
-    { title: "Đã follow", url: "/following", icon: UserCheck },
-    { title: "Bạn bè", url: "/friends", icon: Users },
-    { title: "Tin nhắn", url: "/messages", icon: Send },
-    { title: "Hoạt động", url: "/activity", icon: Bell, badge: 1 },
-    { title: "Tải lên", url: "/upload", icon: Upload },
+  interface NavItem {
+    type: "button" | "link";
+    title: string;
+    url: string;
+    icon: React.ElementType;
+    activeIcon?: React.ElementType;
+    badge?: number;
+    requiresAuth?: boolean;
+  }
+  const navItems: NavItem[] = [
     {
+      type: "link",
+      title: "Đề xuất",
+      url: "/",
+      icon: HomeIcon,
+      activeIcon: HomeActiveIcon,
+    },
+    {
+      type: "link",
+      title: "Đã follow",
+      url: "/following",
+      icon: FollowIcon,
+      activeIcon: FollowActiveIcon,
+    },
+    {
+      type: "link",
+      title: "Bạn bè",
+      url: "/friends",
+      icon: FriendsIcon,
+      activeIcon: FriendsActiveIcon,
+      requiresAuth: true,
+    },
+    {
+      type: "link",
+      title: "Tin nhắn",
+      url: "/messages",
+      icon: MessageIcon,
+      activeIcon: MessageActiveIcon,
+      requiresAuth: true,
+    },
+    {
+      type: "button",
+      title: "Hoạt động",
+      url: "/activity",
+      icon: NotificationIcon,
+      activeIcon: NotificationActiveIcon,
+      requiresAuth: true,
+    },
+    {
+      type: "link",
+      title: "Tải lên",
+      url: "/upload",
+      icon: UploadIcon,
+    },
+    {
+      type: "link",
       title: "Hồ sơ",
       url: `/user/@${currentUser?.username}`,
-      icon: () => <UserAvatar className="w-8 h-8" UserProfile={currentUser} />,
+      icon: () => {
+        if (!currentUser?.username)
+          return (
+            <svg
+              fill="currentColor"
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-8! h-8!"
+            >
+              <path d="M24 3a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 4a6 6 0 1 0 0 12.00A6 6 0 0 0 24 7Zm0 19c10.3 0 16.67 6.99 17 17 .02.55-.43 1-1 1h-2c-.54 0-.98-.45-1-1-.3-7.84-4.9-13-13-13s-12.7 5.16-13 13c-.02.55-.46 1-1.02 1h-2c-.55 0-1-.45-.98-1 .33-10.01 6.7-17 17-17Z"></path>
+            </svg>
+          );
+        return <UserAvatar className="w-8 h-8 " UserProfile={currentUser} />;
+      },
     },
-    { title: "Thêm", url: "/more", icon: MoreHorizontal },
+    {
+      type: "button",
+      title: "Thêm",
+      url: "/more",
+      icon: MoreIcon,
+      activeIcon: MoreIcon,
+    },
   ];
+
+  const visibleNavItems = navItems.filter(
+    (item) => !item.requiresAuth || currentUser,
+  );
+
   return (
     <Sidebar>
       <SidebarHeader className="py-2">
@@ -108,30 +187,39 @@ export function AppSidebar() {
         {/* Nav chính */}
         <SidebarGroup>
           <SidebarMenu>
-            {navItems.map((item) => (
-              <SidebarMenuItem className="py-2" key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname === item.url}
-                  className="relative h-10 text-base font-semibold
-                  data-[active=true]:font-semibold
-                  data-[active=true]:text-tiktok-red
-                  data-[active=true]:[&_svg]:text-tiktok-red"
-                >
-                  <Link to={item.url} className="flex items-center gap-3">
-                    <item.icon className="h-6! w-6! shrink-0!" />
-                    <span>{item.title}</span>
+            {visibleNavItems.map((item) => {
+              const isActive = location.pathname === item.url;
+              const Icon =
+                isActive && item.activeIcon ? item.activeIcon : item.icon;
 
-                    {/* Badge thông báo */}
-                    {item.badge ? (
-                      <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
-                        {item.badge}
-                      </span>
-                    ) : null}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+              return (
+                <SidebarMenuItem className="py-2" key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive}
+                    className="relative h-10 text-base font-semibold
+                    data-[active=true]:font-semibold
+                    data-[active=true]:text-tiktok-red
+                    data-[active=true]:[&_svg]:text-tiktok-red"
+                  >
+                    {item.type === "link" ? (
+                      <NavLink
+                        to={item.url}
+                        className="flex items-center gap-3"
+                      >
+                        <Icon className="w-8! h-8!" />
+                        <span>{item.title}</span>
+                      </NavLink>
+                    ) : (
+                      <button type="button" className="flex items-center gap-3">
+                        <Icon className="w-8! h-8!" />
+                        <span>{item.title}</span>
+                      </button>
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarGroup>
 
@@ -164,22 +252,26 @@ export function AppSidebar() {
               ))}
             </SidebarMenu>
             <Button
-              variant={"outline"}
-              className="w-full justify-start outline-none bg-[#fafafa] border-none"
+              variant={"ghost"}
+              className="w-full justify-start outline-none py-2 border-none"
             >
               <svg
                 fill="currentColor"
-                fontSize="16"
                 viewBox="0 0 48 48"
                 xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
               >
                 <path d="M6 10a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H6Zm0 12a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H6ZM5 35a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-2Zm11-25a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h26a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H16Zm0 12a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h26a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H16Zm-1 13a1 1 0 0 1 1-1h26a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H16a1 1 0 0 1-1-1v-2Z"></path>
               </svg>
               Xem tất cả
             </Button>
           </SidebarGroup>
+        )}
+        {!currentUser && (
+          <div className="px-2 h-10">
+            <Button className="w-full h-full rounded-lg bg-tiktok-red text-white text-sm font-bold hover:opacity-90 transition">
+              Đăng nhập
+            </Button>
+          </div>
         )}
       </SidebarContent>
       <Separator />

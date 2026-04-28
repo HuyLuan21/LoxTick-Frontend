@@ -25,11 +25,13 @@ const loginApi = async (
 const registerApi = async (
   username: string,
   email: string,
+  otp: string,
   password: string,
-): Promise<LoginResponse> => {
-  const response = await axiosInstance.post<LoginResponse>("/auth/register", {
+) => {
+  const response = await axiosInstance.post("/auth/register", {
     username,
     email,
+    otp,
     password,
   });
   return response.data;
@@ -59,8 +61,9 @@ const verifyOtpApi = async (otp: string) => {
 };
 
 // 🔒 Reset password
-const resetPasswordApi = async (otp: string, password: string) => {
+const resetPasswordApi = async (email: string, otp: string, password: string) => {
   const response = await axiosInstance.post("/auth/reset-password", {
+    email,
     otp,
     password,
   });
@@ -89,17 +92,23 @@ export const login = async (email: string, password: string): Promise<User> => {
 export const register = async (
   username: string,
   email: string,
+  otp: string,
   password: string,
-): Promise<User> => {
+) => {
   try {
-    const data = await registerApi(username, email, password);
-
-    // 💾 Auto login sau khi register
-    saveToken(data.token);
-
-    return data.user;
+    return await registerApi(username, email, otp, password);
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Register failed");
+  }
+};
+
+// 📧 Request Register OTP
+export const requestRegisterOtp = async (email: string) => {
+  try {
+    const response = await axiosInstance.post("/auth/request-register-otp", { email });
+    return response.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Request OTP failed");
   }
 };
 
@@ -142,9 +151,9 @@ export const verifyOtp = async (otp: string) => {
 };
 
 // 🔒 Reset password
-export const resetPassword = async (otp: string, password: string) => {
+export const resetPassword = async (email: string, otp: string, password: string) => {
   try {
-    return await resetPasswordApi(otp, password);
+    return await resetPasswordApi(email, otp, password);
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Reset failed");
   }

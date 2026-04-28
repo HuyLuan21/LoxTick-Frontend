@@ -126,7 +126,7 @@ shadow-[0_0_10px_rgba(0,0,0,0.15)] rounded-full font-semibold bg-white"
               setShowLogin(true);
               console.log(showLogin);
             }}
-            className="px-4 py-2 bg-tiktok-red text-white text-sm font-bold rounded-md hover:opacity-90 transition"
+            className="px-3 py-1.5 m-1 mr-0 rounded-2xl bg-tiktok-red text-white text-sm font-bold hover:opacity-90 transition"
           >
             Đăng nhập
           </button>
