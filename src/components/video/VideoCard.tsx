@@ -4,6 +4,7 @@ import VideoInfo from "./VideoInfo";
 import { getFeed } from "@/services/videoService";
 import { useEffect, useState, useRef } from "react";
 import type { Video } from "@/types/video.types";
+import VideoActions from "./VideoActions";
 
 export default function VideoCard() {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -64,17 +65,20 @@ export default function VideoCard() {
   }, [videos.length]);
 
   const currentVideo = videos[currentIndex];
-
+  const isLandscape = currentVideo?.resolution_x > currentVideo?.resolution_y;
+  console.log(isLandscape, currentVideo);
   return (
-    <div className="flex justify-center h-dvh">
+    <div
+      className={`flex justify-center h-dvh py-4 px-4 gap-4 ${isLandscape ? "px-16 pr-44 items-center" : "pr-32"}`}
+    >
       {/* Video */}
-      {currentVideo && <VideoPlayer />}
+      {currentVideo && <VideoPlayer video={currentVideo} />}
 
       {/* Info */}
       <VideoInfo />
 
       {/* Actions */}
-      {/* <VideoActions video={currentVideo} /> */}
+      {currentVideo && <VideoActions video={currentVideo} />}
     </div>
   );
 }

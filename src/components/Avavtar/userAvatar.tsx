@@ -3,31 +3,32 @@ import { createAvatar } from "@dicebear/core";
 import { lorelei } from "@dicebear/collection";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-import type { UserProfile } from "@/types/user.type";
 
 export function UserAvatar({
   className,
-  UserProfile,
+  userName,
+  userAvatarUrl,
 }: {
   className?: string;
-  UserProfile: UserProfile | null;
+  userName: string;
+  userAvatarUrl?: string;
 }) {
   const dicebearAvatar = useMemo(
     () =>
       createAvatar(lorelei, {
-        seed: UserProfile?.username ?? "default",
+        seed: userName ?? "default",
         size: 128,
       }).toDataUri(),
-    [UserProfile?.username],
+    [userName],
   );
 
   return (
     <Avatar className={cn("h-20 w-20", className)}>
-      <AvatarImage src={UserProfile?.avatar_url} />
+      <AvatarImage src={userAvatarUrl} />
       <AvatarFallback>
         <img
           src={dicebearAvatar}
-          alt={UserProfile?.display_name || UserProfile?.username}
+          alt={userName || userAvatarUrl}
           className="h-full w-full"
         />
       </AvatarFallback>

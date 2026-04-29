@@ -1,5 +1,7 @@
 // types/video.types.ts
 
+import type { User } from "./user.type";
+
 export type VideoStatus = "processing" | "active" | "banned";
 export type VideoVisibility = "public" | "private" | "followers_only";
 
@@ -12,8 +14,8 @@ export interface Video {
   thumbnail_url: string | null;
   caption: string | null;
   duration: number | null;
-  resolution_x: number | null;
-  resolution_y: number | null;
+  resolution_x: number;
+  resolution_y: number;
   created_at: string; // hoặc Date
   view_count: number;
   like_count: number;
@@ -25,6 +27,7 @@ export interface Video {
   published_at: string | null;
   allow_repost: boolean;
   allow_comment: boolean;
+  author: Pick<User, "username" | "avatar_url" | "id">;
 }
 
 // Tạo video mới (bỏ các field tự sinh)

@@ -94,7 +94,11 @@ export default function Header({ className }: HeaderProps) {
                 className="flex items-center gap-2 cursor-pointer"
                 onClick={() => setShowDropdown(!showDropdown)}
               >
-                <UserAvatar className="w-8 h-8" UserProfile={currentUser} />
+                <UserAvatar
+                  userName={currentUser.username}
+                  userAvatarUrl={currentUser?.avatar_url}
+                  className="w-8 h-8"
+                />
               </div>
 
               {/* Dropdown */}

@@ -55,7 +55,8 @@ shadow-[0_0_10px_rgba(0,0,0,0.15)] rounded-full font-semibold bg-white"
             >
               <UserAvatar
                 className="w-7 h-7 ring-4 ring-[#f2f2f2] dark:ring-gray-300 transition hover:ring-[#e0e0e0] dark:hover:ring-gray-400"
-                UserProfile={currentUser}
+                userName={currentUser.username}
+                userAvatarUrl={currentUser.avatar_url}
               />
             </div>
 

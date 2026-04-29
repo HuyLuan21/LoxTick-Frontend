@@ -1,36 +1,47 @@
 import { useEffect } from "react";
 import type { Video } from "@/types/video.types";
 import { getFeed } from "@/services/videoService";
+import FormatCount from "@/utils/formatCount";
+import {
+  HeartIcon,
+  CommentIcon,
+  BookMarkIcon,
+  ShareIcon,
+  FollowUserIcon,
+} from "@/components/Icons/Icons";
+import { UserAvatar } from "@/components/Avavtar/userAvatar";
+import { cn } from "@/lib/utils";
 
 //video,like,command,bookmark,share
 function ActionsButtons({
   icon,
   count,
   onClick,
+  className,
 }: {
   icon: React.ReactNode;
-  count: number;
+  count?: number;
   onClick: () => void;
+  className?: string;
 }) {
   return (
     <div
       onClick={onClick}
-      className="flex flex-col items-center gap-1 cursor-pointer text-center"
+      className="flex flex-col items-center cursor-pointer text-center"
     >
-      {icon}
-      <p className="text-sm">{FormatCount({ count })}</p>
+      <div
+        className={cn(
+          `bg-[#f1f1f2] dark:bg-tiktok-dark-bg dark:hover:bg-tiktok-dark-hover mt-2 mx-0 mb-1.5 rounded-full size-12 flex justify-center items-center shadow-lg`,
+          className,
+        )}
+      >
+        {icon}
+      </div>
+      {count && <p className="text-semibold">{FormatCount({ count })}</p>}
     </div>
   );
 }
-function FormatCount({ count }: { count: number }) {
-  if (count >= 1_000_000) {
-    return `${(count / 1_000_000).toFixed(1)}M`;
-  }
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K`;
-  }
-  return count;
-}
+
 export default function VideoActions({ video }: { video: Video }) {
   useEffect(() => {
     const fetchVideo = async () => {
@@ -43,16 +54,48 @@ export default function VideoActions({ video }: { video: Video }) {
     };
     fetchVideo();
   }, []);
+
   return (
-    <div>
+    <div className="flex flex-col gap-2 justify-end">
       <ActionsButtons
-        icon="/icons/heart.svg"
-        count={video.like_count}
+        icon={
+          <div className="flex relative mb-5">
+            <UserAvatar
+              className="size-12"
+              userName={video.author.username}
+              userAvatarUrl={video.author.avatar_url}
+            />
+            <div className="absolute size-6 bottom-0 translate-y-1/2 left-1/2 -translate-x-1/2  bg-tiktok-red flex justify-center items-center rounded-full border-2 border-white dark:border-tiktok-dark-bg">
+              <FollowUserIcon className="size-3.5 text-white dark:text-white" />
+            </div>
+          </div>
+        }
         onClick={() => {}}
       />
-      <ActionsButtons icon="" count={video.comment_count} onClick={() => {}} />
-      <ActionsButtons icon="" count={video.save_count} onClick={() => {}} />
-      <ActionsButtons icon="" count={video.repost_count} onClick={() => {}} />
+      <ActionsButtons
+        icon={<HeartIcon className="size-6 flex justify-center items-center" />}
+        count={100}
+        onClick={() => {}}
+      />
+      <ActionsButtons
+        icon={
+          <CommentIcon className="size-6 flex justify-center items-center" />
+        }
+        count={100}
+        onClick={() => {}}
+      />
+      <ActionsButtons
+        icon={
+          <BookMarkIcon className="size-6 flex justify-center items-center" />
+        }
+        count={100}
+        onClick={() => {}}
+      />
+      <ActionsButtons
+        icon={<ShareIcon className="size-6 flex justify-center items-center" />}
+        count={100}
+        onClick={() => {}}
+      />
     </div>
   );
 }
