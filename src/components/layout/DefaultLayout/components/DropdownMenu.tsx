@@ -19,7 +19,7 @@ export default function DropdownMenu() {
     <>
       <div
         className="flex items-center gap-2 px-2 absolute top-4 right-4 
-shadow-[0_0_10px_rgba(0,0,0,0.15)] rounded-full font-semibold bg-white"
+shadow-[0_0_10px_rgba(0,0,0,0.15)] rounded-full font-semibold bg-white z-9999"
       >
         <Link
           to="404NotFound"

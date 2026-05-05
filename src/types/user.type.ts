@@ -7,13 +7,14 @@ export interface User {
   bio?: string;
   role: string;
   is_loading: boolean;
+  is_following: boolean;
 }
 
 export interface UserProfile extends User {
   followers?: number;
   following?: number;
   likes?: number;
-  is_following?: boolean;
+  // is_following?: boolean;
 }
 
 export interface UpdateProfilePayload {

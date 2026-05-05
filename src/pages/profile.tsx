@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { userServices } from "@/services/userServices";
+import { userServices, togleFollow } from "@/services/userServices";
 import { useAppSelector } from "@/redux/hooks";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -26,10 +25,9 @@ import {
   SquarePlay,
   UserPlus,
 } from "lucide-react";
-import { createAvatar } from "@dicebear/core";
-import { lorelei } from "@dicebear/collection";
 import { EditProfileModal } from "@/components/auth/EditProfileModal";
 import type { UserProfile } from "@/types/user.type";
+import { UserAvatar } from "@/components/Avavtar/userAvatar";
 
 type SortType = "Mới nhất" | "Thịnh Hành" | "Cũ nhất";
 
@@ -44,15 +42,6 @@ const ProfilePage = () => {
   const [sort, setSort] = useState<SortType>("Mới nhất");
   const [editOpen, setEditOpen] = useState(false);
 
-  const dicebearAvatar = useMemo(
-    () =>
-      createAvatar(lorelei, {
-        seed: user?.username ?? "default",
-        size: 128,
-      }).toDataUri(),
-    [user?.username],
-  );
-
   const isOwner = !!currentUser && currentUser.username === user?.username;
   useEffect(() => {
     if (!username) return;
@@ -61,7 +50,10 @@ const ProfilePage = () => {
 
     userServices
       .getUser(username)
-      .then((data) => setUser(data))
+      .then((data) => {
+        setUser(data);
+        setFollowing(data.is_following ?? false);
+      })
       .catch(() => setError("Không thể tải thông tin người dùng."))
       .finally(() => setLoading(false));
   }, [username]);
@@ -89,17 +81,11 @@ const ProfilePage = () => {
       <div className="mx-auto max-w-300 px-6 pb-4 pt-8">
         {/* Profile Header */}
         <div className="mb-8 flex flex-col items-start gap-6 sm:flex-row">
-          <Avatar className="h-52 w-52 shrink-0 ring-2 ring-border">
-            <AvatarImage src={user.avatar_url} />
-            <AvatarFallback>
-              <img
-                src={dicebearAvatar}
-                alt={user.username}
-                className="h-full w-full"
-              />
-            </AvatarFallback>
-          </Avatar>
-
+          <UserAvatar
+            className="size-52 shrink-0 ring-2 ring-border"
+            userName={user.username}
+            userAvatarUrl={user.avatar_url}
+          />
           <div className="my-auto min-w-0 flex-1">
             {/* Names */}
             <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -141,7 +127,10 @@ const ProfilePage = () => {
               ) : (
                 <>
                   <Button
-                    onClick={() => setFollowing(!following)}
+                    onClick={async() => {
+                      await togleFollow(user.username)
+                      setFollowing(!following)
+                    }}
                     className={`cursor-pointer rounded px-6 text-sm font-bold ${
                       following
                         ? "border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80"

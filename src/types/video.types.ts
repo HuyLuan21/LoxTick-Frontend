@@ -27,7 +27,7 @@ export interface Video {
   published_at: string | null;
   allow_repost: boolean;
   allow_comment: boolean;
-  author: Pick<User, "username" | "avatar_url" | "id">;
+  author: Pick<User, "username" | "avatar_url" | "id" | "is_following">;
 }
 
 // Tạo video mới (bỏ các field tự sinh)

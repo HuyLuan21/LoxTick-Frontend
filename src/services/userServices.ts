@@ -33,10 +33,15 @@ export const getFollowingList = async (
   });
   return response.data;
 };
-
+// router.post("/users/:username/follow", verifyToken, userCtrl.toggleFollow);
+export const togleFollow = async (username: string) => {
+  const response = await axiosInstance.post(`/users/${username}/follow`);
+  return response.data;
+};
 export const userServices = {
   getUser,
   uploadToCloudinary,
   updateProfile,
   getFollowingList,
+  togleFollow,
 };
