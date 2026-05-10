@@ -12,8 +12,8 @@ router.post("/videos/:id/like", verifyToken, videoCtrl.toggleLike);
 router.post("/videos/:id/save", verifyToken, videoCtrl.toggleSave);
     */
 }
-export const getFeed = async () => {
-  const response = await axiosInstance.get("/feed");
+export const getFeed = async (cursor?: string) => {
+  const response = await axiosInstance.get("/feed", { params: { cursor } });
   return response.data;
 };
 export const getFollowingFeed = async () => {

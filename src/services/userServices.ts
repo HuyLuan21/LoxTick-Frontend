@@ -38,10 +38,32 @@ export const togleFollow = async (username: string) => {
   const response = await axiosInstance.post(`/users/${username}/follow`);
   return response.data;
 };
+// router.get("/feed", videoCtrl.getFeed);
+// router.get("/feed/following", verifyToken, videoCtrl.getFollowingFeed);
+// router.post("/videos", verifyToken, videoCtrl.uploadVideo);
+// router.get("/videos/:id", videoCtrl.getVideo);
+// router.delete("/videos/:id", verifyToken, videoCtrl.deleteVideo);
+// router.post("/videos/:id/like", verifyToken, videoCtrl.toggleLike);
+// router.post("/videos/:id/save", verifyToken, videoCtrl.toggleSave);
+export const toggleLike = async (videoId: number) => {
+  const response = await axiosInstance.post(`/videos/${videoId}/like`);
+  return response.data;
+};
+export const toggleSave = async (videoId: number) => {
+  const response = await axiosInstance.post(`/videos/${videoId}/save`);
+  return response.data;
+};
+export const share = async (videoId: number) => {
+  const response = await axiosInstance.get(`/videos/${videoId}`);
+  return response.data;
+};
 export const userServices = {
   getUser,
   uploadToCloudinary,
   updateProfile,
   getFollowingList,
   togleFollow,
+  toggleLike,
+  toggleSave,
+  share,
 };

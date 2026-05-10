@@ -19,7 +19,7 @@ export default function DropdownMenu() {
     <>
       <div
         className="flex items-center gap-2 px-2 absolute top-4 right-4 
-shadow-[0_0_10px_rgba(0,0,0,0.15)] rounded-full font-semibold bg-white z-9999"
+shadow-[0_0_10px_rgba(0,0,0,0.15)] rounded-full font-semibold bg-white z-9999 dark:bg-[#181818]"
       >
         <Link
           to="404NotFound"
@@ -54,7 +54,7 @@ shadow-[0_0_10px_rgba(0,0,0,0.15)] rounded-full font-semibold bg-white z-9999"
               onClick={() => setShowDropdown(!showDropdown)}
             >
               <UserAvatar
-                className="w-7 h-7 ring-4 ring-[#f2f2f2] dark:ring-gray-300 transition hover:ring-[#e0e0e0] dark:hover:ring-gray-400"
+                className="w-7 h-7 ring-4 ring-[#f2f2f2] dark:ring-[#2b2b2b] transition hover:ring-[#e0e0e0] dark:hover:ring-[#4c4c4c]"
                 userName={currentUser.username}
                 userAvatarUrl={currentUser.avatar_url}
               />

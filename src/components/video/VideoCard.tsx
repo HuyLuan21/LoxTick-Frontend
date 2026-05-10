@@ -1,15 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import VideoActions from "./VideoActions";
 import VideoInfo from "./VideoInfo";
 import VideoPlayer from "./VideoPlayer";
 import type { Video } from "@/types/video.types";
 import { getFeed } from "@/services/videoService";
+import { VideoComments } from "./VideoComments";
 
 export default function VideoCard() {
   const [videos, setVideos] = useState<Video[]>([]);
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const isScrolling = useRef(false);
-
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const loadingRef = useRef(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
@@ -21,31 +27,60 @@ export default function VideoCard() {
       try {
         const response = await getFeed();
         setVideos(response.videos || []);
+        setHasMore(response.hasMore);
+        setNextCursor(response.nextCursor);
       } catch (err) {
         console.error("Fetch video error:", err);
       }
     };
     fetchVideo();
   }, []);
+  // LOAD MORE
+  const loadMore = useCallback(async () => {
+    if (loadingRef.current || !hasMore || !nextCursor) return;
+    loadingRef.current = true;
+    try {
+      const response = await getFeed(nextCursor);
+      setVideos((prev) => [...prev, ...(response.videos || [])]);
+      setNextCursor(response.nextCursor);
+      setHasMore(response.hasMore);
+    } catch (err) {
+      console.error("Load more error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, hasMore, nextCursor]);
 
-  // ✅ Wheel
   useEffect(() => {
+    if (currentIndex >= videos.length - 5) {
+      loadMore();
+    }
+  }, [currentIndex, videos.length]);
+  // Wheel
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
     const handleWheel = (e: WheelEvent) => {
       if (isScrolling.current || videos.length === 0) return;
+
+      e.preventDefault();
       isScrolling.current = true;
-      setCurrentIndex((prev) => {
-        if (e.deltaY > 0) return Math.min(prev + 1, videos.length - 1);
-        else return Math.max(prev - 1, 0);
-      });
+
+      setCurrentIndex((prev) =>
+        e.deltaY > 0
+          ? Math.min(prev + 1, videos.length - 1)
+          : Math.max(prev - 1, 0),
+      );
+
       setTimeout(() => {
         isScrolling.current = false;
-      }, 700);
+      }, 150);
     };
-    window.addEventListener("wheel", handleWheel);
-    return () => window.removeEventListener("wheel", handleWheel);
+    el.addEventListener("wheel", handleWheel);
+    return () => el.removeEventListener("wheel", handleWheel);
   }, [videos.length]);
 
-  // ✅ Keyboard
+  // Keyboard
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (videos.length === 0) return;
@@ -58,7 +93,7 @@ export default function VideoCard() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [videos.length]);
 
-  // ✅ Drag
+  // Drag
   const handlePointerDown = (e: React.PointerEvent) => {
     startY.current = e.clientY;
     setIsDragging(true);
@@ -95,6 +130,32 @@ export default function VideoCard() {
       ),
     );
   };
+  const handleLikeToggle = (videoId: number, isLiked: boolean) => {
+    setVideos((prev) =>
+      prev.map((v) =>
+        v.id === videoId
+          ? {
+              ...v,
+              is_liked: isLiked,
+              like_count: isLiked ? v.like_count + 1 : v.like_count - 1,
+            }
+          : v,
+      ),
+    );
+  };
+  const handleSaveClick = (videoId: number, isSaved: boolean) => {
+    setVideos((prev) =>
+      prev.map((v) =>
+        v.id === videoId
+          ? {
+              ...v,
+              is_saved: isSaved,
+              save_count: isSaved ? v.save_count + 1 : v.save_count - 1,
+            }
+          : v,
+      ),
+    );
+  };
 
   const currentVideo = videos[currentIndex];
   const isLandscape = currentVideo?.resolution_x > currentVideo?.resolution_y;
@@ -105,8 +166,17 @@ export default function VideoCard() {
         isLandscape ? "px-16 pr-44 items-center" : "pr-32"
       }`}
     >
+      {currentVideo && (
+        <VideoComments
+          open={true}
+          onOpenChange={() => {}}
+          videoId={currentVideo?.id}
+        />
+      )}
+
       {/* Stack video — độc lập, không bị ảnh hưởng bởi padding/gap */}
       <div
+        ref={containerRef}
         className="relative overflow-hidden h-dvh"
         style={{ width: isLandscape ? "auto" : "fit-content" }}
         onPointerDown={handlePointerDown}
@@ -141,7 +211,15 @@ export default function VideoCard() {
       {/* Info & Actions — vẫn ở ngoài, căn theo viewport */}
       <div className="flex flex-col justify-end gap-4 py-4">
         <VideoInfo />
-        {currentVideo && <VideoActions video={currentVideo} onFollowToggle={handleFollowToggle} />}
+        {currentVideo && (
+          <VideoActions
+            video={currentVideo}
+            onFollowToggle={handleFollowToggle}
+            onLikeToggle={handleLikeToggle}
+            onSaveClick={handleSaveClick}
+            onShareClick={() => {}}
+          />
+        )}
       </div>
     </div>
   );

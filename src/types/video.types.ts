@@ -11,6 +11,8 @@ export interface Video {
   video_url: string;
   playback_url: string | null;
   public_id: string | null;
+  is_liked: boolean;
+  is_saved: boolean;
   thumbnail_url: string | null;
   caption: string | null;
   duration: number | null;

@@ -10,7 +10,12 @@ import {
 } from "@/components/Icons/Icons";
 import { UserAvatar } from "@/components/Avavtar/userAvatar";
 import { cn } from "@/lib/utils";
-import { togleFollow } from "@/services/userServices";
+import {
+  togleFollow,
+  toggleLike,
+  toggleSave,
+  share,
+} from "@/services/userServices";
 
 //video,like,command,bookmark,share
 function ActionsButtons({
@@ -21,7 +26,7 @@ function ActionsButtons({
 }: {
   icon: React.ReactNode;
   count?: number;
-  onClick: () => void;
+  onClick?: () => void;
   className?: string;
 }) {
   return (
@@ -45,9 +50,15 @@ function ActionsButtons({
 export default function VideoActions({
   video,
   onFollowToggle,
+  onLikeToggle,
+  onSaveClick,
+  onShareClick,
 }: {
   video: Video;
   onFollowToggle: (username: string, isFollowing: boolean) => void;
+  onLikeToggle: (videoId: number, isLiked: boolean) => void;
+  onSaveClick: (videoId: number, isSaved: boolean) => void;
+  onShareClick: (videoId: number) => void;
 }) {
   const handleToggleFollow = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -60,6 +71,41 @@ export default function VideoActions({
       // Rollback nếu API lỗi
       onFollowToggle(video.author.username, !newFollowState);
       console.error("Toggle follow error:", err);
+    }
+  };
+  const handleLike = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newLikeState = !video.is_liked;
+    onLikeToggle(video.id, newLikeState);
+    try {
+      await toggleLike(video.id);
+    } catch (err) {
+      // Rollback nếu API lỗi
+      onLikeToggle(video.id, !newLikeState);
+      console.error("Toggle like error:", err);
+    }
+  };
+  const handleSave = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newSaveState = !video.is_saved;
+    onSaveClick(video.id, newSaveState);
+    try {
+      await toggleSave(video.id);
+    } catch (err) {
+      // Rollback nếu API lỗi
+      onSaveClick(video.id, !newSaveState);
+      console.error("Toggle save error:", err);
+    }
+  };
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onShareClick(video.id);
+    try {
+      await share(video.id);
+    } catch (err) {
+      // Rollback nếu API lỗi
+      onShareClick(video.id);
+      console.error("Toggle share error:", err);
     }
   };
 
@@ -94,29 +140,53 @@ export default function VideoActions({
         }}
       />
       <ActionsButtons
-        icon={<HeartIcon className="size-6 flex justify-center items-center" />}
+        icon={
+          video.is_liked ? (
+            <HeartIcon
+              onClick={handleLike}
+              className="size-6 fill-tiktok-red flex justify-center items-center"
+            />
+          ) : (
+            <HeartIcon
+              onClick={handleLike}
+              className="size-6 flex justify-center items-center"
+            />
+          )
+        }
         count={video.like_count}
-        onClick={() => {}}
       />
       <ActionsButtons
         icon={
           <CommentIcon className="size-6 flex justify-center items-center" />
         }
         count={video.comment_count}
-        onClick={() => {}}
       />
       <ActionsButtons
         icon={
-          <BookMarkIcon className="size-6 flex justify-center items-center" />
+          video.is_saved ? (
+            <BookMarkIcon
+              onClick={handleSave}
+              className="size-6 fill-[#face15] flex justify-center items-center"
+            />
+          ) : (
+            <BookMarkIcon
+              onClick={handleSave}
+              className="size-6 flex justify-center items-center"
+            />
+          )
         }
         count={video.save_count}
-        onClick={() => {}}
       />
       <ActionsButtons
-        icon={<ShareIcon className="size-6 flex justify-center items-center" />}
+        icon={
+          <ShareIcon
+            className="size-6 flex justify-center items-center"
+            onClick={handleShare}
+          />
+        }
         count={video.repost_count}
-        onClick={() => {}}
       />
+      
     </div>
   );
 }
