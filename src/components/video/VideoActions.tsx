@@ -30,7 +30,7 @@ function ActionsButtons({
   className?: string;
 }) {
   return (
-    <div
+    <button
       onClick={onClick}
       className="flex flex-col items-center cursor-pointer text-center"
     >
@@ -43,7 +43,7 @@ function ActionsButtons({
         {icon}
       </div>
       {count && <p className="text-semibold">{FormatCount({ count })}</p>}
-    </div>
+    </button>
   );
 }
 
@@ -53,12 +53,14 @@ export default function VideoActions({
   onLikeToggle,
   onSaveClick,
   onShareClick,
+  onCommentClick,
 }: {
   video: Video;
   onFollowToggle: (username: string, isFollowing: boolean) => void;
   onLikeToggle: (videoId: number, isLiked: boolean) => void;
   onSaveClick: (videoId: number, isSaved: boolean) => void;
   onShareClick: (videoId: number) => void;
+  onCommentClick: () => void;
 }) {
   const handleToggleFollow = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -73,8 +75,7 @@ export default function VideoActions({
       console.error("Toggle follow error:", err);
     }
   };
-  const handleLike = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleLike = async () => {
     const newLikeState = !video.is_liked;
     onLikeToggle(video.id, newLikeState);
     try {
@@ -85,8 +86,7 @@ export default function VideoActions({
       console.error("Toggle like error:", err);
     }
   };
-  const handleSave = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleSave = async () => {
     const newSaveState = !video.is_saved;
     onSaveClick(video.id, newSaveState);
     try {
@@ -97,8 +97,7 @@ export default function VideoActions({
       console.error("Toggle save error:", err);
     }
   };
-  const handleShare = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleShare = async () => {
     onShareClick(video.id);
     try {
       await share(video.id);
@@ -142,17 +141,12 @@ export default function VideoActions({
       <ActionsButtons
         icon={
           video.is_liked ? (
-            <HeartIcon
-              onClick={handleLike}
-              className="size-6 fill-tiktok-red flex justify-center items-center"
-            />
+            <HeartIcon className="size-6 fill-tiktok-red flex justify-center items-center" />
           ) : (
-            <HeartIcon
-              onClick={handleLike}
-              className="size-6 flex justify-center items-center"
-            />
+            <HeartIcon className="size-6 flex justify-center items-center" />
           )
         }
+        onClick={handleLike}
         count={video.like_count}
       />
       <ActionsButtons
@@ -160,33 +154,24 @@ export default function VideoActions({
           <CommentIcon className="size-6 flex justify-center items-center" />
         }
         count={video.comment_count}
+        onClick={onCommentClick}
       />
       <ActionsButtons
         icon={
           video.is_saved ? (
-            <BookMarkIcon
-              onClick={handleSave}
-              className="size-6 fill-[#face15] flex justify-center items-center"
-            />
+            <BookMarkIcon className="size-6 fill-[#face15] flex justify-center items-center" />
           ) : (
-            <BookMarkIcon
-              onClick={handleSave}
-              className="size-6 flex justify-center items-center"
-            />
+            <BookMarkIcon className="size-6 flex justify-center items-center" />
           )
         }
+        onClick={handleSave}
         count={video.save_count}
       />
       <ActionsButtons
-        icon={
-          <ShareIcon
-            className="size-6 flex justify-center items-center"
-            onClick={handleShare}
-          />
-        }
+        icon={<ShareIcon className="size-6 flex justify-center items-center" />}
         count={video.repost_count}
+        onClick={handleShare}
       />
-      
     </div>
   );
 }

@@ -6,9 +6,14 @@ import type { Video } from "@/types/video.types";
 import { getFeed } from "@/services/videoService";
 import { VideoComments } from "./VideoComments";
 
-export default function VideoCard() {
+export default function VideoCard({
+  isCommentOpen,
+  setIsCommentOpen,
+}: {
+  isCommentOpen: boolean;
+  setIsCommentOpen: (open: boolean) => void;
+}) {
   const [videos, setVideos] = useState<Video[]>([]);
-  const [isCommentOpen, setIsCommentOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const isScrolling = useRef(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -156,6 +161,13 @@ export default function VideoCard() {
       ),
     );
   };
+  const handleCommentToggle = () => {
+    if (isCommentOpen) {
+      setIsCommentOpen(false);
+    } else {
+      setIsCommentOpen(true);
+    }
+  };
 
   const currentVideo = videos[currentIndex];
   const isLandscape = currentVideo?.resolution_x > currentVideo?.resolution_y;
@@ -168,9 +180,10 @@ export default function VideoCard() {
     >
       {currentVideo && (
         <VideoComments
-          open={true}
-          onOpenChange={() => {}}
+          open={isCommentOpen}
+          onOpenChange={setIsCommentOpen}
           videoId={currentVideo?.id}
+          videoAuthorId={currentVideo?.author?.id}
         />
       )}
 
@@ -218,6 +231,7 @@ export default function VideoCard() {
             onLikeToggle={handleLikeToggle}
             onSaveClick={handleSaveClick}
             onShareClick={() => {}}
+            onCommentClick={handleCommentToggle}
           />
         )}
       </div>

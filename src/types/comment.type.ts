@@ -7,7 +7,9 @@ interface CommentModel {
   parent_id: number | null;
   content: string;
   created_at: string;
-  author: Pick<User, "id" | "username" | "avatar_url">;
+  like_count: number;
+  is_liked: boolean;
+  author: Pick<User, "id" | "username" | "display_name" | "avatar_url">;
   replies_count: number;
   replies?: CommentModel[];
 }

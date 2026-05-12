@@ -1,12 +1,17 @@
-import VideoCard from "@/components/video/VideoCard";
-import { VideoComments } from "@/components/video/VideoComments";
-import DropdownMenu from "@/components/layout/DefaultLayout/components/DropdownMenu";
 import { useState } from "react";
+import VideoCard from "@/components/video/VideoCard";
+import DropdownMenu from "@/components/layout/DefaultLayout/components/DropdownMenu";
+
 const HomePage = () => {
+  const [isCommentOpen, setIsCommentOpen] = useState(false);
+
   return (
     <div className="relative flex items-center justify-center">
-      <DropdownMenu />
-      <VideoCard />
+      {!isCommentOpen && <DropdownMenu />}
+      <VideoCard
+        isCommentOpen={isCommentOpen}
+        setIsCommentOpen={setIsCommentOpen}
+      />
       {/* <LoxTikFeed /> */}
     </div>
   );

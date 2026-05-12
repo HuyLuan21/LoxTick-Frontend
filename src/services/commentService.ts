@@ -25,3 +25,14 @@ export const getComments = async ({
     console.error("Error fetching comments:", error);
   }
 };
+
+export const toggleCommentLike = async (
+  commentId: number,
+): Promise<{ liked: boolean } | undefined> => {
+  try {
+    const response = await axiosInstance.post(`/comments/${commentId}/like`);
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling comment like:", error);
+  }
+};
