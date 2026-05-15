@@ -1,6 +1,7 @@
 import { useState } from "react";
 import VideoCard from "@/components/video/VideoCard";
 import DropdownMenu from "@/components/layout/DefaultLayout/components/DropdownMenu";
+import { getFeed } from "@/services/videoService";
 
 const HomePage = () => {
   const [isCommentOpen, setIsCommentOpen] = useState(false);
@@ -11,9 +12,12 @@ const HomePage = () => {
       <VideoCard
         isCommentOpen={isCommentOpen}
         setIsCommentOpen={setIsCommentOpen}
+        fetchFn={getFeed}
       />
-      {/* <LoxTikFeed /> */}
     </div>
+
+    
+
   );
 };
 export default HomePage;

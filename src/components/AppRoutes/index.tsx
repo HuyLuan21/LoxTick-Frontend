@@ -8,6 +8,7 @@ import FollowingPage from "@/pages/following";
 import FriendsPage from "@/pages/friends";
 import ActivityPage from "@/pages/activity";
 import MessagePage from "@/pages/message";
+import VideoGrid from "@/components/video/VideoGrid";
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -19,7 +20,24 @@ const AppRoutes = () => {
           <Route path="friends" element={<FriendsPage />} />
           <Route path="activity" element={<ActivityPage />} />
           <Route path="messages" element={<MessagePage />} />
-          <Route path="user/:username" element={<ProfilePage />} />
+          <Route path="user/:username" element={<ProfilePage />}>
+            <Route
+              path="videos"
+              element={<VideoGrid type="user" videos={[]} />}
+            />
+            <Route
+              path="repost"
+              element={<VideoGrid type="repost" videos={[]} />}
+            />
+            <Route
+              path="liked"
+              element={<VideoGrid type="liked" videos={[]} />}
+            />
+            <Route
+              path="saved"
+              element={<VideoGrid type="saved" videos={[]} />}
+            />
+          </Route>
         </Route>
         {/* Layout riêng */}
         <Route

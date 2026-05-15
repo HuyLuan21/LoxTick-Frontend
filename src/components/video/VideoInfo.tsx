@@ -1,9 +1,16 @@
-export default function VideoInfo() {
+export default function VideoInfo({
+  username,
+  caption,
+}: {
+  username: string;
+  caption: string;
+}) {
   return (
-    <div className="absolute bottom-10 left-1/2">
+    <div className="absolute bottom-2 left-2 w-full text-white">
       {/* username */}
-      <p>abc</p>
+      <p className="font-semibold">{username}</p>
       {/* caption */}
+      <p className="[word-break:break-word]">{caption}</p>
     </div>
   );
 }

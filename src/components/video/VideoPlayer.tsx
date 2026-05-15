@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, forwardRef } from "react";
 import type { Video } from "@/types/video.types";
+import VideoInfo from "./VideoInfo";
 
 const VideoPlayer = forwardRef<HTMLVideoElement, { video: Video }>(
   ({ video }, ref) => {
@@ -119,6 +120,11 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { video: Video }>(
             style={{ width: `${progress}%` }}
           />
         </div>
+
+        <VideoInfo
+          username={video?.author?.username}
+          caption={video?.caption ?? ""}
+        />
       </div>
     );
   },

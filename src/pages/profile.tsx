@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { Outlet, useParams, Link, useLocation } from "react-router-dom";
 import { userServices, togleFollow } from "@/services/userServices";
 import { useAppSelector } from "@/redux/hooks";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,8 +18,6 @@ import {
   MessageCircle,
   MoreHorizontal,
   Pencil,
-  // Pin,
-  // Play,
   Repeat2,
   SquarePlay,
   UserPlus,
@@ -34,6 +31,11 @@ type SortType = "Mới nhất" | "Thịnh Hành" | "Cũ nhất";
 const ProfilePage = () => {
   const { username } = useParams<{ username: string }>();
   const currentUser = useAppSelector((state) => state.user.currentUser);
+  const location = useLocation();
+  const currentTab =
+    ["videos", "repost", "liked", "saved"].find((t) =>
+      location.pathname.endsWith(`/${t}`),
+    ) || "videos";
 
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -119,7 +121,7 @@ const ProfilePage = () => {
                       if (res.user && res.user.username !== user.username) {
                         window.location.href = `/user/@${res.user.username}`;
                       } else {
-                        // window.location.reload();
+                        window.location.reload();
                       }
                     }}
                   />
@@ -127,9 +129,9 @@ const ProfilePage = () => {
               ) : (
                 <>
                   <Button
-                    onClick={async() => {
-                      await togleFollow(user.username)
-                      setFollowing(!following)
+                    onClick={async () => {
+                      await togleFollow(user.username);
+                      setFollowing(!following);
                     }}
                     className={`cursor-pointer rounded px-6 text-sm font-bold ${
                       following
@@ -218,7 +220,7 @@ const ProfilePage = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="videos" className="w-full">
+        <Tabs value={currentTab} className="w-full">
           <div className="flex items-center justify-between border-b border-border">
             <TabsList
               variant="line"
@@ -229,30 +231,37 @@ const ProfilePage = () => {
                   value: "videos",
                   icon: <SquarePlay className="h-4 w-4" />,
                   label: "Video",
+                  to: "videos",
                 },
                 {
                   value: "repost",
                   icon: <Repeat2 className="h-4 w-4" />,
                   label: "Bài đăng lại",
+                  to: "repost",
                 },
                 {
                   value: "liked",
                   icon: <Heart className="h-4 w-4" />,
                   label: "Đã thích",
+                  to: "liked",
                 },
                 {
                   value: "bookmarked",
                   icon: <Bookmark className="h-4 w-4" />,
                   label: "Đã lưu",
+                  to: "saved",
                 },
               ].map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
                   className="px-4 font-semibold text-lg"
+                  asChild
                 >
-                  {tab.icon}
-                  {tab.label}
+                  <Link to={tab.to} className="flex items-center gap-2">
+                    {tab.icon}
+                    {tab.label}
+                  </Link>
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -290,6 +299,7 @@ const ProfilePage = () => {
           </div>
         </Tabs>
       </div>
+      <Outlet></Outlet>
     </div>
   );
 };

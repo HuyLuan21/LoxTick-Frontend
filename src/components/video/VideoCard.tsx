@@ -1,20 +1,27 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import VideoActions from "./VideoActions";
-import VideoInfo from "./VideoInfo";
 import VideoPlayer from "./VideoPlayer";
 import type { Video } from "@/types/video.types";
-import { getFeed } from "@/services/videoService";
 import { VideoComments } from "./VideoComments";
+
+export interface VideoFeedResponse {
+  videos: Video[];
+  nextCursor?: string | null;
+  hasMore: boolean;
+}
 
 export default function VideoCard({
   isCommentOpen,
   setIsCommentOpen,
+  fetchFn,
 }: {
   isCommentOpen: boolean;
   setIsCommentOpen: (open: boolean) => void;
+  fetchFn: (cursor?: string) => Promise<any>;
 }) {
   const [videos, setVideos] = useState<Video[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [initialLoad, setInitialLoad] = useState(true);
   const isScrolling = useRef(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,24 +37,26 @@ export default function VideoCard({
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const response = await getFeed();
+        const response = await fetchFn();
         setVideos(response.videos || []);
         setHasMore(response.hasMore);
-        setNextCursor(response.nextCursor);
+        setNextCursor(response.nextCursor ?? null);
       } catch (err) {
         console.error("Fetch video error:", err);
+      } finally {
+        setInitialLoad(false);
       }
     };
     fetchVideo();
-  }, []);
+  }, [fetchFn]);
   // LOAD MORE
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMore || !nextCursor) return;
     loadingRef.current = true;
     try {
-      const response = await getFeed(nextCursor);
+      const response = await fetchFn(nextCursor);
       setVideos((prev) => [...prev, ...(response.videos || [])]);
-      setNextCursor(response.nextCursor);
+      setNextCursor(response.nextCursor ?? null);
       setHasMore(response.hasMore);
     } catch (err) {
       console.error("Load more error:", err);
@@ -172,6 +181,22 @@ export default function VideoCard({
   const currentVideo = videos[currentIndex];
   const isLandscape = currentVideo?.resolution_x > currentVideo?.resolution_y;
 
+  if (initialLoad) {
+    return (
+      <div className="flex items-center justify-center w-full h-dvh">
+        <div className="w-8 h-8 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (videos.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-dvh text-white">
+        <p className="text-gray-500 text-lg">Chưa có video nào để hiển thị.</p>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`relative flex justify-center h-dvh overflow-hidden gap-4 ${
@@ -223,7 +248,6 @@ export default function VideoCard({
 
       {/* Info & Actions — vẫn ở ngoài, căn theo viewport */}
       <div className="flex flex-col justify-end gap-4 py-4">
-        <VideoInfo />
         {currentVideo && (
           <VideoActions
             video={currentVideo}
