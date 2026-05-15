@@ -36,3 +36,31 @@ export const toggleCommentLike = async (
     console.error("Error toggling comment like:", error);
   }
 };
+export const addComment = async ({
+  videoId,
+  parentId,
+  content,
+}: {
+  videoId: number;
+  parentId?: number;
+  content: string;
+}) => {
+  try {
+    const response = await axiosInstance.post(`/videos/${videoId}/comments`, {
+      parent_id: parentId,
+      content,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error adding comment:", error);
+  }
+};
+
+export const deleteComment = async (commentId: number) => {
+  try {
+    const response = await axiosInstance.delete(`/comments/${commentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+  }
+};

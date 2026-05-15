@@ -124,5 +124,4 @@ const VideoPlayer = forwardRef<HTMLVideoElement, { video: Video }>(
   },
 );
 
-VideoPlayer.displayName = "VideoPlayer";
 export default VideoPlayer;

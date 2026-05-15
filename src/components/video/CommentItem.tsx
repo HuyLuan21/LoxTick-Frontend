@@ -1,9 +1,23 @@
-import { getComments, toggleCommentLike } from "@/services/commentService";
+import {
+  getComments,
+  toggleCommentLike,
+  deleteComment,
+} from "@/services/commentService";
 import type { CommentModel, CommentResponse } from "@/types/comment.type";
 import { useState } from "react";
 import { UserAvatar } from "../Avavtar/userAvatar";
-import { Flag, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { useAppSelector } from "@/redux/hooks";
+import { selectCurrentUser } from "@/redux/selector";
+import { MoreIcon } from "../Icons/Icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import CommentInput from "../comment/CommentInput";
 
 interface CommentItemProps {
   comment: CommentModel;
@@ -13,6 +27,8 @@ interface CommentItemProps {
   >;
   videoAuthorId: number;
   replyToUsername?: string; // username của người được reply (dùng khi flatten level 3+)
+  activeReplyId: number | null;
+  setActiveReplyId: (id: number | null) => void;
 }
 
 /**
@@ -67,13 +83,20 @@ const CommentItem = ({
   setComments,
   videoAuthorId,
   replyToUsername,
+  activeReplyId,
+  setActiveReplyId,
 }: CommentItemProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLiked, setIsLiked] = useState(comment.is_liked);
   const [likeCount, setLikeCount] = useState(comment.like_count);
   const { requireAuth } = useRequireAuth();
+  const currentUser = useAppSelector(selectCurrentUser);
 
+  const isMyComment = currentUser?.id === comment.author.id;
+  const isMyVideo = currentUser?.id === videoAuthorId;
   const isAuthor = comment.author.id === videoAuthorId;
+
+  const isReplying = activeReplyId === comment.id;
 
   const handleToggleLike = () => {
     requireAuth(async () => {
@@ -138,6 +161,36 @@ const CommentItem = ({
     }
   };
 
+  const handleDeleteComment = () => {
+    requireAuth(async () => {
+      try {
+        await deleteComment(comment.id);
+        setComments((prev) => {
+          if (!prev) return prev;
+          const removeComment = (
+            comments: CommentModel[],
+            targetId: number,
+          ): CommentModel[] => {
+            return comments
+              .filter((c) => c.id !== targetId)
+              .map((c) => ({
+                ...c,
+                replies: c.replies
+                  ? removeComment(c.replies, targetId)
+                  : undefined,
+              }));
+          };
+          return {
+            ...prev,
+            comments: removeComment(prev.comments, comment.id),
+          };
+        });
+      } catch (error) {
+        console.error("Lỗi khi xóa comment:", error);
+      }
+    });
+  };
+
   return (
     // comment tối đa 3 cấp (level 0, 1, 2). Level 3+ flatten về level 2.
     <div
@@ -163,18 +216,39 @@ const CommentItem = ({
               Tác giả
             </span>
           )}
-          {/* Report button — hiện khi hover */}
-          <button
-            className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-muted cursor-pointer"
-            title="Báo cáo bình luận"
-            onClick={() =>
-              requireAuth(() => {
-                /* report logic */
-              })
-            }
-          >
-            <Flag className="w-3.5 h-3.5 text-muted-foreground" />
-          </button>
+          {/* Action button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-muted cursor-pointer"
+                title="Thêm"
+              >
+                <MoreIcon className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {(isMyComment || isMyVideo) && (
+                <DropdownMenuItem
+                  className="text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer font-medium"
+                  onClick={handleDeleteComment}
+                >
+                  Xóa
+                </DropdownMenuItem>
+              )}
+              {!isMyComment && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    requireAuth(() => {
+                      /* report logic */
+                    })
+                  }
+                  className="cursor-pointer font-medium"
+                >
+                  Báo cáo
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Comment content */}
@@ -198,7 +272,7 @@ const CommentItem = ({
             className="text-xs text-muted-foreground font-medium hover:text-foreground cursor-pointer transition-colors"
             onClick={() =>
               requireAuth(() => {
-                /* reply logic */
+                setActiveReplyId(isReplying ? null : comment.id);
               })
             }
           >
@@ -223,6 +297,21 @@ const CommentItem = ({
             </span>
           </button>
         </div>
+
+        {/* Inline Reply Input */}
+        {isReplying && (
+          <div className={`mt-2 ${level < 2 ? "ml-5" : "-ml-10.5"}`}>
+            <CommentInput
+              userAvatarUrl={currentUser?.avatar_url || ""}
+              userName={currentUser?.username || ""}
+              videoId={comment.video_id}
+              setComments={setComments}
+              parentId={comment.id}
+              onSuccess={() => setActiveReplyId(null)}
+              className=""
+            />
+          </div>
+        )}
 
         {/* Load more replies */}
         {comment.replies_count - (comment.replies?.length ?? 0) > 0 && (
@@ -251,6 +340,8 @@ const CommentItem = ({
                 level={1}
                 setComments={setComments}
                 videoAuthorId={videoAuthorId}
+                activeReplyId={activeReplyId}
+                setActiveReplyId={setActiveReplyId}
               />
             ))}
           </div>
@@ -272,6 +363,8 @@ const CommentItem = ({
                   setComments={setComments}
                   videoAuthorId={videoAuthorId}
                   replyToUsername={rtu}
+                  activeReplyId={activeReplyId}
+                  setActiveReplyId={setActiveReplyId}
                 />
               ),
             )}
