@@ -7,6 +7,7 @@ import "./App.css";
 import AppRoutes from "./components/AppRoutes";
 import { useAppDispatch } from "./redux/hooks";
 import { getCurrentUser } from "./redux/slices/authSlice";
+import GlobalModalProvider from "./components/auth/GlobalModalProvider";
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -19,5 +20,10 @@ export default function App() {
     }
   }, []);
 
-  return <AppRoutes />;
+  return (
+    <>
+      <AppRoutes />
+      <GlobalModalProvider />
+    </>
+  );
 }

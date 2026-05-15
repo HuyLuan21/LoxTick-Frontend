@@ -3,6 +3,7 @@ import type { CommentModel, CommentResponse } from "@/types/comment.type";
 import { useState } from "react";
 import { UserAvatar } from "../Avavtar/userAvatar";
 import { Flag, Heart } from "lucide-react";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 interface CommentItemProps {
   comment: CommentModel;
@@ -11,6 +12,7 @@ interface CommentItemProps {
     React.SetStateAction<CommentResponse | undefined>
   >;
   videoAuthorId: number;
+  replyToUsername?: string; // username của người được reply (dùng khi flatten level 3+)
 }
 
 /**
@@ -24,24 +26,63 @@ const formatDate = (dateStr: string): string => {
   return `${day}-${month}-${year}`;
 };
 
+/**
+ * Flatten reply tree thành danh sách phẳng.
+ * Dùng ở level 1 để gom tất cả replies con/cháu thành siblings cùng cấp (level 2).
+ * - Direct replies (con trực tiếp): không có @username
+ * - Nested replies (cháu trở đi): có @username của parent
+ */
+const flattenReplies = (
+  replies: CommentModel[],
+  parentAuthorName?: string,
+): Array<{ comment: CommentModel; replyToUsername?: string }> => {
+  const result: Array<{ comment: CommentModel; replyToUsername?: string }> = [];
+  for (const reply of replies) {
+    result.push({ comment: reply, replyToUsername: parentAuthorName });
+    if (reply.replies && reply.replies.length > 0) {
+      const authorName = reply.author.display_name || reply.author.username;
+      result.push(...flattenReplies(reply.replies, authorName));
+    }
+  }
+  return result;
+};
+
+/**
+ * Đếm tổng số replies chưa load trong cây comment (đệ quy).
+ * Dùng để hiển thị "Xem thêm X trả lời" ở level 1.
+ */
+const countUnloadedReplies = (comment: CommentModel): number => {
+  let count = comment.replies_count - (comment.replies?.length ?? 0);
+  if (comment.replies) {
+    for (const reply of comment.replies) {
+      count += countUnloadedReplies(reply);
+    }
+  }
+  return count;
+};
+
 const CommentItem = ({
   comment,
   level = 0,
   setComments,
   videoAuthorId,
+  replyToUsername,
 }: CommentItemProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLiked, setIsLiked] = useState(comment.is_liked);
   const [likeCount, setLikeCount] = useState(comment.like_count);
+  const { requireAuth } = useRequireAuth();
 
   const isAuthor = comment.author.id === videoAuthorId;
 
-  const handleToggleLike = async () => {
-    const result = await toggleCommentLike(comment.id);
-    if (result) {
-      setIsLiked(result.liked);
-      setLikeCount((prev) => (result.liked ? prev + 1 : prev - 1));
-    }
+  const handleToggleLike = () => {
+    requireAuth(async () => {
+      const result = await toggleCommentLike(comment.id);
+      if (result) {
+        setIsLiked(result.liked);
+        setLikeCount((prev) => (result.liked ? prev + 1 : prev - 1));
+      }
+    });
   };
 
   const handleLoadMoreReplies = async () => {
@@ -98,7 +139,7 @@ const CommentItem = ({
   };
 
   return (
-    // comment 2 cấp
+    // comment tối đa 3 cấp (level 0, 1, 2). Level 3+ flatten về level 2.
     <div
       style={{ marginLeft: level > 1 ? 20 : level * 20 }}
       className="group flex gap-2.5 py-2.5"
@@ -126,6 +167,11 @@ const CommentItem = ({
           <button
             className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-muted cursor-pointer"
             title="Báo cáo bình luận"
+            onClick={() =>
+              requireAuth(() => {
+                /* report logic */
+              })
+            }
           >
             <Flag className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
@@ -133,6 +179,11 @@ const CommentItem = ({
 
         {/* Comment content */}
         <p className="text-sm text-foreground mt-0.5 word-break">
+          {replyToUsername && (
+            <span className="text-primary font-semibold mr-1">
+              @{replyToUsername}
+            </span>
+          )}
           {comment.content}
         </p>
 
@@ -143,7 +194,14 @@ const CommentItem = ({
             {formatDate(comment.created_at)}
           </span>
           {/* Reply button */}
-          <button className="text-xs text-muted-foreground font-medium hover:text-foreground cursor-pointer transition-colors">
+          <button
+            className="text-xs text-muted-foreground font-medium hover:text-foreground cursor-pointer transition-colors"
+            onClick={() =>
+              requireAuth(() => {
+                /* reply logic */
+              })
+            }
+          >
             Trả lời
           </button>
           {/* Like — pushed to right */}
@@ -184,21 +242,43 @@ const CommentItem = ({
         )}
 
         {/* Replies */}
-        {comment.replies && comment.replies.length > 0 && (
+        {level === 0 && comment.replies && comment.replies.length > 0 && (
           <div className="mt-1">
-            {comment.replies.map((reply) => {
-              return (
+            {comment.replies.map((reply) => (
+              <CommentItem
+                key={reply.id}
+                comment={reply}
+                level={1}
+                setComments={setComments}
+                videoAuthorId={videoAuthorId}
+              />
+            ))}
+          </div>
+        )}
+
+        {/*
+         * Level 1: flatten tất cả replies con/cháu thành danh sách phẳng ở level 2.
+         * Replies trực tiếp: không có @username
+         * Replies sâu hơn (cháu): có @username của parent
+         */}
+        {level === 1 && comment.replies && comment.replies.length > 0 && (
+          <div className="mt-1">
+            {flattenReplies(comment.replies).map(
+              ({ comment: reply, replyToUsername: rtu }) => (
                 <CommentItem
                   key={reply.id}
                   comment={reply}
-                  level={level + 1}
+                  level={2}
                   setComments={setComments}
                   videoAuthorId={videoAuthorId}
+                  replyToUsername={rtu}
                 />
-              );
-            })}
+              ),
+            )}
           </div>
         )}
+
+        {/* Level 2+: không render replies (parent level 1 đã flatten và render rồi) */}
       </div>
     </div>
   );

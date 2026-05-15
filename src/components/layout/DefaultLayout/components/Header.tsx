@@ -1,10 +1,9 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { selectCurrentUser } from "@/redux/selector";
 import { useState } from "react";
-import LoginModal from "../../../auth/LoginModal";
 import { logout } from "@/redux/slices/authSlice";
+import { openLoginModal } from "@/redux/slices/modalSlice";
 import { cn } from "@/lib/utils";
-import ResetModal from "../../../auth/ResetModal";
 import { Link } from "react-router-dom";
 import { UserAvatar } from "@/components/Avavtar/userAvatar";
 
@@ -14,8 +13,6 @@ interface HeaderProps {
 
 export default function Header({ className }: HeaderProps) {
   const dispatch = useAppDispatch();
-  const [showReset, setShowReset] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const currentUser = useAppSelector(selectCurrentUser);
@@ -109,15 +106,6 @@ export default function Header({ className }: HeaderProps) {
                     onClick={() => setShowDropdown(false)}
                   />
                   <div className="absolute right-0 top-10 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden dark:bg-tiktok-dark-bg dark:border-tiktok-dark-border">
-                    {/* Tên user */}
-                    <div className="px-4 py-3 border-b border-gray-100 dark:border-tiktok-dark-border">
-                      <p className="text-sm font-semibold text-gray-800 dark:text-white">
-                        {currentUser?.display_name || currentUser?.username}
-                      </p>
-                      <p className="text-xs text-gray-400 truncate">
-                        {currentUser?.email}
-                      </p>
-                    </div>
                     {/* Xem hồ sơ */}
                     <Link to={`/user/@${currentUser?.username}`}>
                       <button
@@ -173,7 +161,7 @@ export default function Header({ className }: HeaderProps) {
             </div>
           ) : (
             <button
-              onClick={() => setShowLogin(true)}
+              onClick={() => dispatch(openLoginModal())}
               className="px-4 py-2 bg-tiktok-red text-white text-sm font-bold rounded-md hover:opacity-90 transition"
             >
               Đăng nhập
@@ -181,23 +169,6 @@ export default function Header({ className }: HeaderProps) {
           )}
         </div>
       </header>
-      <LoginModal
-        isOpen={showLogin}
-        onClose={() => setShowLogin(false)}
-        onForgot={() => {
-          setShowLogin(false);
-          setShowReset(true);
-        }}
-      />
-
-      <ResetModal
-        isOpen={showReset}
-        onClose={() => setShowReset(false)}
-        onBack={() => {
-          setShowReset(false);
-          setShowLogin(true);
-        }}
-      />
     </>
   );
 }

@@ -16,6 +16,7 @@ import {
   toggleSave,
   share,
 } from "@/services/userServices";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 //video,like,command,bookmark,share
 function ActionsButtons({
@@ -62,50 +63,60 @@ export default function VideoActions({
   onShareClick: (videoId: number) => void;
   onCommentClick: () => void;
 }) {
+  const { requireAuth } = useRequireAuth();
+
   const handleToggleFollow = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const newFollowState = !video.author.is_following;
-    // Optimistic update: cập nhật tất cả video cùng tác giả ngay lập tức
-    onFollowToggle(video.author.username, newFollowState);
-    try {
-      await togleFollow(video.author.username);
-    } catch (err) {
-      // Rollback nếu API lỗi
-      onFollowToggle(video.author.username, !newFollowState);
-      console.error("Toggle follow error:", err);
-    }
+    requireAuth(async () => {
+      const newFollowState = !video.author.is_following;
+      // Optimistic update: cập nhật tất cả video cùng tác giả ngay lập tức
+      onFollowToggle(video.author.username, newFollowState);
+      try {
+        await togleFollow(video.author.username);
+      } catch (err) {
+        // Rollback nếu API lỗi
+        onFollowToggle(video.author.username, !newFollowState);
+        console.error("Toggle follow error:", err);
+      }
+    });
   };
-  const handleLike = async () => {
-    const newLikeState = !video.is_liked;
-    onLikeToggle(video.id, newLikeState);
-    try {
-      await toggleLike(video.id);
-    } catch (err) {
-      // Rollback nếu API lỗi
-      onLikeToggle(video.id, !newLikeState);
-      console.error("Toggle like error:", err);
-    }
+  const handleLike = () => {
+    requireAuth(async () => {
+      const newLikeState = !video.is_liked;
+      onLikeToggle(video.id, newLikeState);
+      try {
+        await toggleLike(video.id);
+      } catch (err) {
+        // Rollback nếu API lỗi
+        onLikeToggle(video.id, !newLikeState);
+        console.error("Toggle like error:", err);
+      }
+    });
   };
-  const handleSave = async () => {
-    const newSaveState = !video.is_saved;
-    onSaveClick(video.id, newSaveState);
-    try {
-      await toggleSave(video.id);
-    } catch (err) {
-      // Rollback nếu API lỗi
-      onSaveClick(video.id, !newSaveState);
-      console.error("Toggle save error:", err);
-    }
+  const handleSave = () => {
+    requireAuth(async () => {
+      const newSaveState = !video.is_saved;
+      onSaveClick(video.id, newSaveState);
+      try {
+        await toggleSave(video.id);
+      } catch (err) {
+        // Rollback nếu API lỗi
+        onSaveClick(video.id, !newSaveState);
+        console.error("Toggle save error:", err);
+      }
+    });
   };
-  const handleShare = async () => {
-    onShareClick(video.id);
-    try {
-      await share(video.id);
-    } catch (err) {
-      // Rollback nếu API lỗi
+  const handleShare = () => {
+    requireAuth(async () => {
       onShareClick(video.id);
-      console.error("Toggle share error:", err);
-    }
+      try {
+        await share(video.id);
+      } catch (err) {
+        // Rollback nếu API lỗi
+        onShareClick(video.id);
+        console.error("Toggle share error:", err);
+      }
+    });
   };
 
   return (

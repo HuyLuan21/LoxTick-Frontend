@@ -1,17 +1,14 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { selectCurrentUser } from "@/redux/selector";
 import { useState } from "react";
-import LoginModal from "../../../auth/LoginModal";
 import { logout } from "@/redux/slices/authSlice";
+import { openLoginModal } from "@/redux/slices/modalSlice";
 
-import ResetModal from "../../../auth/ResetModal";
 import { Link } from "react-router-dom";
 import { UserAvatar } from "@/components/Avavtar/userAvatar";
 
 export default function DropdownMenu() {
   const dispatch = useAppDispatch();
-  const [showReset, setShowReset] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
 
   const currentUser = useAppSelector(selectCurrentUser);
@@ -123,32 +120,12 @@ shadow-[0_0_10px_rgba(0,0,0,0.15)] rounded-full font-semibold bg-white z-9999 da
           </div>
         ) : (
           <button
-            onClick={() => {
-              setShowLogin(true);
-              console.log(showLogin);
-            }}
+            onClick={() => dispatch(openLoginModal())}
             className="px-3 py-1.5 m-1 mr-0 rounded-2xl bg-tiktok-red text-white text-sm font-bold hover:opacity-90 transition"
           >
             Đăng nhập
           </button>
         )}
-        <LoginModal
-          isOpen={showLogin}
-          onClose={() => setShowLogin(false)}
-          onForgot={() => {
-            setShowLogin(false);
-            setShowReset(true);
-          }}
-        />
-
-        <ResetModal
-          isOpen={showReset}
-          onClose={() => setShowReset(false)}
-          onBack={() => {
-            setShowReset(false);
-            setShowLogin(true);
-          }}
-        />
       </div>
     </>
   );

@@ -3,10 +3,13 @@ import type { CommentModel, CommentResponse } from "@/types/comment.type";
 import { getComments } from "@/services/commentService";
 import InfiniteScroll from "react-infinite-scroll-component";
 import CommentItem from "./CommentItem";
-import { X } from "lucide-react";
+import { ArrowUp, X } from "lucide-react";
 import { UserAvatar } from "../Avavtar/userAvatar";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { selectCurrentUser } from "@/redux/selector";
+import { Button } from "../ui/button";
+import { openLoginModal } from "@/redux/slices/modalSlice";
+import { MentionIcon, ReactionIcon } from "../Icons/Icons";
 
 const LIMIT_COMMENTS = 10;
 
@@ -23,6 +26,7 @@ export function VideoComments({
 }) {
   const [comments, setComments] = useState<CommentResponse>();
   const panelRef = useRef<HTMLDivElement>(null);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (!open) return;
@@ -137,20 +141,42 @@ export function VideoComments({
       </div>
 
       {/* Footer — comment input placeholder */}
-      <div className="border-t border-border px-4 py-3">
-        <div className="flex items-center gap-2">
-          <UserAvatar
-            className="size-8"
-            userName={currentUser?.username || ""}
-            userAvatarUrl={currentUser?.avatar_url || ""}
-          />
-          <input
-            type="text"
-            placeholder="Thêm bình luận..."
-            className="flex-1 bg-muted rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-          />
+      {currentUser ? (
+        <div className="border-t border-border px-4 py-3">
+          <div className="flex items-center gap-2">
+            <UserAvatar
+              className="size-8"
+              userName={currentUser?.username || ""}
+              userAvatarUrl={currentUser?.avatar_url || ""}
+            />
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Thêm bình luận..."
+                className="w-full bg-muted rounded-full px-4 pr-10 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              />
+              <div className="absolute right-2 inset-y-0 flex items-center gap-2">
+                <MentionIcon className="size-7  cursor-pointer hover:text-foreground transition-colors" />
+                <ReactionIcon className="size-7  cursor-pointer hover:text-foreground transition-colors" />
+              </div>
+            </div>
+            <Button className="size-7 bg-tiktok-red rounded-full">
+              <ArrowUp />
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="border-t border-border px-4 py-3">
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => dispatch(openLoginModal())}
+              className="w-full h-10 bg-tiktok-red rounded-full"
+            >
+              Đăng nhập để bình luận
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

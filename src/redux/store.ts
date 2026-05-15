@@ -1,5 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authSlice from "./slices/authSlice";
+import modalSlice from "./slices/modalSlice";
 
 import {
   persistStore,
@@ -22,6 +23,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   user: authSlice,
+  modal: modalSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

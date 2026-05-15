@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, NavLink, useLocation } from "react-router";
 import { UserAvatar } from "@/components/Avavtar/userAvatar";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { openLoginModal } from "@/redux/slices/modalSlice";
 import { userServices } from "@/services/userServices";
 import { useEffect, useState } from "react";
 import type { UserProfile } from "@/types/user.type";
@@ -35,6 +36,7 @@ import {
 export function AppSidebar() {
   const location = useLocation();
   const currentUser = useAppSelector((state) => state.user.currentUser);
+  const dispatch = useAppDispatch();
   // const [openModal, setOpenModal] = useState(false);
   const [following, setFollowing] = useState<UserProfile[]>([]);
   useEffect(() => {
@@ -278,7 +280,10 @@ export function AppSidebar() {
         )}
         {!currentUser && (
           <div className="px-2 h-10">
-            <Button className="w-full h-full rounded-lg bg-tiktok-red text-white text-sm font-bold hover:opacity-90 transition">
+            <Button
+              onClick={() => dispatch(openLoginModal())}
+              className="w-full h-full rounded-lg bg-tiktok-red text-white text-sm font-bold hover:opacity-90 transition"
+            >
               Đăng nhập
             </Button>
           </div>
