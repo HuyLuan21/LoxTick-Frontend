@@ -9,6 +9,7 @@ import { selectCurrentUser } from "@/redux/selector";
 import { Button } from "../ui/button";
 import { openLoginModal } from "@/redux/slices/modalSlice";
 import CommentInput from "../comment/CommentInput";
+import socket from "@/helpers/socket";
 
 const LIMIT_COMMENTS = 10;
 
@@ -56,6 +57,33 @@ export function VideoComments({
   }, [open, onOpenChange]);
 
   const currentUser = useAppSelector(selectCurrentUser);
+
+  useEffect(() => {
+    (async () => {
+      // Join room comment
+      const maxRetryCount = 3;
+      let retryCount = 0;
+
+      // retry nếu socket chưa kịp kết nối
+      if (!socket.connected) {
+        while (retryCount < maxRetryCount) {
+          try {
+            socket.connect();
+          } catch (error) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            retryCount++;
+          }
+        }
+      }
+
+      // join comment room
+      socket.emit("JOIN_COMMENT_ROOM", { videoId });
+    })();
+
+    return () => {
+      socket.emit("LEAVE_COMMENT_ROOM", { videoId });
+    };
+  }, [videoId]);
 
   return (
     <div

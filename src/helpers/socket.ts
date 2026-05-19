@@ -5,6 +5,11 @@ const URL = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace("/api", "") // Bỏ /api nếu có để kết nối tới root của backend
   : "http://localhost:3000";
 
-export const socket = io(URL, {
-  autoConnect: true, // Kết nối ngay khi load trang
+const socket = io(URL, {
+  autoConnect: false,
+  auth: (cb) => {
+    cb({ token: localStorage.getItem("access_token") });
+  },
 });
+
+export default socket;
