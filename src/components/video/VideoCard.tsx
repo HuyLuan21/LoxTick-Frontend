@@ -33,7 +33,7 @@ export default function VideoCard({
   const startY = useRef(0);
   const THRESHOLD = 80;
 
-  // ✅ Fetch
+  // Fetch
   useEffect(() => {
     const fetchVideo = async () => {
       try {

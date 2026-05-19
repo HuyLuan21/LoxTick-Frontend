@@ -8,6 +8,7 @@ import AppRoutes from "./components/AppRoutes";
 import { useAppDispatch } from "./redux/hooks";
 import { getCurrentUser } from "./redux/slices/authSlice";
 import GlobalModalProvider from "./components/auth/GlobalModalProvider";
+import { socket } from "./socket";
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -18,6 +19,21 @@ export default function App() {
     if (token) {
       dispatch(getCurrentUser());
     }
+
+    // --- TEST SOCKET ---
+    socket.on("connect", () => {
+      console.log("🟢 [TEST] Đã kết nối Socket.IO! ID của bạn là:", socket.id);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("🔴 [TEST] Đã ngắt kết nối Socket.IO!");
+    });
+ 
+    // Clean up
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+    };
   }, []);
 
   return (

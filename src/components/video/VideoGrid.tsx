@@ -22,7 +22,7 @@ function VideoGrid({
     <div className="grid grid-cols-3 gap-1 md:gap-4">
       {videos.map((video) => (
         <Link key={video.id} to={`/video/${video.id}`} className="group">
-          <div className="relative aspect-[9/16] overflow-hidden rounded-md bg-zinc-900">
+          <div className="relative aspect-9/16 overflow-hidden rounded-md bg-zinc-900">
             {video.thumbnail_url ? (
               <img
                 src={video.thumbnail_url}

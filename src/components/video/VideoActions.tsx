@@ -69,12 +69,10 @@ export default function VideoActions({
     e.stopPropagation();
     requireAuth(async () => {
       const newFollowState = !video.author.is_following;
-      // Optimistic update: cập nhật tất cả video cùng tác giả ngay lập tức
       onFollowToggle(video.author.username, newFollowState);
       try {
         await togleFollow(video.author.username);
       } catch (err) {
-        // Rollback nếu API lỗi
         onFollowToggle(video.author.username, !newFollowState);
         console.error("Toggle follow error:", err);
       }
@@ -87,7 +85,7 @@ export default function VideoActions({
       try {
         await toggleLike(video.id);
       } catch (err) {
-        // Rollback nếu API lỗi
+       
         onLikeToggle(video.id, !newLikeState);
         console.error("Toggle like error:", err);
       }
@@ -100,7 +98,7 @@ export default function VideoActions({
       try {
         await toggleSave(video.id);
       } catch (err) {
-        // Rollback nếu API lỗi
+  
         onSaveClick(video.id, !newSaveState);
         console.error("Toggle save error:", err);
       }
@@ -112,7 +110,7 @@ export default function VideoActions({
       try {
         await share(video.id);
       } catch (err) {
-        // Rollback nếu API lỗi
+
         onShareClick(video.id);
         console.error("Toggle share error:", err);
       }
